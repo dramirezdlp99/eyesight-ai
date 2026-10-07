@@ -1,48 +1,43 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Flutter / Dart
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/coverage/
+build/
+coverage/
+*.iml
+.idea/
+.metadata.bak
 
-# Symbolication related
-app.*.symbols
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+**/*.jks
+**/*.keystore
+android/app/debug
+android/app/profile
+android/app/release
+*.log
 
-# Obfuscation related
-app.*.map.json
+# Secretos: este proyecto no usa archivos .env ni claves de API
+.env
+.env.*
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Entrenamiento del modelo (numeral 3.13.2)
+ml/.venv/
+ml/datasets/
+ml/runs/
+ml/**/*.pt
+ml/**/*.onnx
+ml/**/__pycache__/
 
-# Widget Preview related
-.widget_preview/
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
