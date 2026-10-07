@@ -9,7 +9,7 @@ void main() {
     expect(find.text('EyeSight AI'), findsOneWidget);
     expect(
       tester.getSemantics(find.text('EyeSight AI')),
-         isSemantics(isHeader: true, label: 'EyeSight AI'),
+      isSemantics(isHeader: true, label: 'EyeSight AI'),
     );
     expect(find.byType(MaterialApp), findsOneWidget);
   });
