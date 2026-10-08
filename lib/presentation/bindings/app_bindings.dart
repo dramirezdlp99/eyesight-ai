@@ -1,5 +1,10 @@
 import 'package:get/get.dart';
 
+import '../../core/device/haptics.dart';
+import '../../core/device/location_service.dart';
+import '../../core/device/permission_guard.dart';
+import '../../core/device/speech_service.dart';
+import '../../core/device/voice_input.dart';
 import '../../core/security/data_wipe_service.dart';
 import '../../core/security/encrypted_storage.dart';
 import '../../core/security/pin_guard.dart';
@@ -15,6 +20,7 @@ import '../../domain/repositories/i_settings_repository.dart';
 import '../../domain/repositories/i_zone_repository.dart';
 import '../../domain/usecases/purge_old_history.dart';
 import '../../domain/usecases/zone_service.dart';
+import '../controllers/theme_controller.dart';
 
 /// Crea y registra las dependencias de la aplicación con la inyección de
 /// GetX (numeral 3.12.4). Las capas superiores solo conocen las interfaces.
@@ -55,6 +61,15 @@ abstract final class AppBindings {
       DataWipeService(storage: storage, keys: keys, pin: pin),
       permanent: true,
     );
+
+    // Servicios del teléfono: se crean al usarse por primera vez, para que
+    // las pruebas no necesiten los plugins nativos.
+    Get.lazyPut<ISpeechService>(FlutterTtsSpeechService.new, fenix: true);
+    Get.lazyPut<IVoiceInput>(SpeechToTextVoiceInput.new, fenix: true);
+    Get.lazyPut<IHaptics>(VibrationHaptics.new, fenix: true);
+    Get.lazyPut<ILocationService>(GeolocatorLocationService.new, fenix: true);
+    Get.lazyPut<IPermissionGuard>(PermissionHandlerGuard.new, fenix: true);
+    Get.put<ThemeController>(ThemeController(), permanent: true);
 
     // Retención de 90 días del historial (HU12, CA4).
     await PurgeOldHistory(history)(now());
