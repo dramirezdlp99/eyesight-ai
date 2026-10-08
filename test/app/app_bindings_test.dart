@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:eyesight_ai/core/device/haptics.dart';
+import 'package:eyesight_ai/core/device/location_service.dart';
+import 'package:eyesight_ai/core/device/permission_guard.dart';
+import 'package:eyesight_ai/core/device/speech_service.dart';
+import 'package:eyesight_ai/core/device/voice_input.dart';
 import 'package:eyesight_ai/core/security/data_wipe_service.dart';
 import 'package:eyesight_ai/core/security/encrypted_storage.dart';
 import 'package:eyesight_ai/core/security/pin_guard.dart';
@@ -10,6 +15,7 @@ import 'package:eyesight_ai/domain/repositories/i_settings_repository.dart';
 import 'package:eyesight_ai/domain/repositories/i_zone_repository.dart';
 import 'package:eyesight_ai/domain/usecases/zone_service.dart';
 import 'package:eyesight_ai/presentation/bindings/app_bindings.dart';
+import 'package:eyesight_ai/presentation/controllers/theme_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
@@ -41,6 +47,17 @@ void main() {
     expect(Get.isRegistered<ZoneService>(), isTrue);
     expect(Get.isRegistered<DataWipeService>(), isTrue);
     expect(store.values.length, 1); // solo la clave AES-256
+  });
+
+  test('registra los servicios del teléfono sin crearlos todavía', () async {
+    await AppBindings.init(
+        secureStore: store, storageDirectory: dir.path, clock: () => t0);
+    expect(Get.isRegistered<ISpeechService>(), isTrue);
+    expect(Get.isRegistered<IVoiceInput>(), isTrue);
+    expect(Get.isRegistered<IHaptics>(), isTrue);
+    expect(Get.isRegistered<ILocationService>(), isTrue);
+    expect(Get.isRegistered<IPermissionGuard>(), isTrue);
+    expect(Get.find<ThemeController>().profile.value, isNull);
   });
 
   test('al arrancar purga el historial de más de 90 días (HU12, CA4)',
