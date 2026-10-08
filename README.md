@@ -66,9 +66,28 @@ manipulación). Hoy se incluye YOLOv8n **preentrenado en COCO** (modelo base de 
 modelo **ajustado e INT8** se produce con `ml/` y se instala con `ml/scripts/export.py`.
 
 La inferencia corre con LiteRT en un hilo aislado que hace la conversión YUV, la inferencia y la
-NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla inicial, muestra la
+NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla del escáner y en la del
+acompañante, muestra la
 cámara con las cajas, los cuadros por segundo y los tiempos de inferencia y de captura a
 resultado (RNF01 a RNF03).
+
+## Identidad visual y accesibilidad
+
+Diseño propio, sin elementos de terceros: un ojo animado que parpadea y emite ondas
+(`lib/presentation/widgets/eye_logo.dart`) y tres temas en `lib/presentation/theme/`:
+
+| Tema | Uso | Colores |
+|---|---|---|
+| Claro | Ceguera total y acompañante, con el teléfono en modo claro | Azul `#1A4B8C` sobre blanco |
+| Oscuro | Los mismos perfiles, con el teléfono en modo oscuro | Azul `#8DB9FF` sobre `#0D141F` |
+| Alto contraste | Siempre en el perfil de baja visión (HU05) | Amarillo `#FFD600` sobre negro, texto de 24 sp o más |
+
+Todos los pares de texto y fondo cumplen al menos 4,5:1 (RNF07), verificado por
+`test/presentation/theme/app_theme_test.dart`. Con «Quitar animaciones» activado en Android, el
+ojo queda quieto.
+
+Al abrir la app por primera vez se anuncian los perfiles por voz y se pueden elegir hablando o con
+los botones (HU01). El perfil de acompañante pide crear o ingresar un PIN.
 
 ## Pruebas
 
