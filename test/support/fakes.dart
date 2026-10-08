@@ -1,9 +1,11 @@
 import 'package:eyesight_ai/core/security/secure_store.dart';
+import 'package:eyesight_ai/domain/entities/app_settings.dart';
 import 'package:eyesight_ai/domain/entities/detection_record.dart';
 import 'package:eyesight_ai/domain/entities/risk_zone.dart';
 import 'package:eyesight_ai/domain/entities/zone_audit_entry.dart';
 import 'package:eyesight_ai/domain/repositories/i_audit_repository.dart';
 import 'package:eyesight_ai/domain/repositories/i_history_repository.dart';
+import 'package:eyesight_ai/domain/repositories/i_settings_repository.dart';
 import 'package:eyesight_ai/domain/repositories/i_zone_repository.dart';
 
 /// Almacén seguro en memoria, en lugar del Android Keystore.
@@ -91,4 +93,19 @@ class InMemoryHistoryRepository implements IHistoryRepository {
     String? label,
   }) async =>
       records.toList();
+}
+
+class InMemorySettingsRepository implements ISettingsRepository {
+  InMemorySettingsRepository([this.value = const AppSettings()]);
+
+  AppSettings value;
+
+  @override
+  Future<AppSettings> load() async => value;
+
+  @override
+  Future<void> save(AppSettings settings) async => value = settings;
+
+  @override
+  Future<void> clear() async => value = const AppSettings();
 }
