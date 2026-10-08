@@ -58,6 +58,18 @@ flutter devices
 flutter run
 ```
 
+## Modelo de visión artificial
+
+`assets/models/` contiene el modelo, sus etiquetas y `model_manifest.json` con su SHA-256. La app
+verifica ese resumen antes de ejecutar el modelo y, si no coincide, no lo carga (STRIDE:
+manipulación). Hoy se incluye YOLOv8n **preentrenado en COCO** (modelo base de la hipótesis); el
+modelo **ajustado e INT8** se produce con `ml/` y se instala con `ml/scripts/export.py`.
+
+La inferencia corre con LiteRT en un hilo aislado que hace la conversión YUV, la inferencia y la
+NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla inicial, muestra la
+cámara con las cajas, los cuadros por segundo y los tiempos de inferencia y de captura a
+resultado (RNF01 a RNF03).
+
 ## Pruebas
 
 `flutter test` ejecuta las pruebas de todas las capas. La prueba
