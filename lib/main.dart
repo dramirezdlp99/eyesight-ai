@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
 
 import 'presentation/bindings/app_bindings.dart';
-import 'presentation/views/debug/detection_debug_view.dart';
+import 'presentation/controllers/theme_controller.dart';
+import 'presentation/routes/app_pages.dart';
+import 'presentation/routes/app_routes.dart';
+import 'presentation/theme/app_theme.dart';
 
 /// Punto de entrada de EyeSight AI.
-///
-/// Bloque 2: almacenamiento cifrado, dependencias y prueba de detección con
-/// la cámara. La interfaz completa llega en los bloques 3 y 4.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // La cámara va a la altura del pecho en vertical (numeral 1.8).
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   String? startupError;
   try {
     await AppBindings.init();
@@ -25,60 +29,59 @@ class EyeSightApp extends StatelessWidget {
   /// Mensaje si falló el arranque; la app lo muestra en lugar de cerrarse.
   final String? startupError;
 
+  static const _locale = Locale('es', 'CO');
+  static const _locales = [Locale('es', 'CO'), Locale('es')];
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'EyeSight AI',
-      debugShowCheckedModeBanner: false,
-      locale: const Locale('es', 'CO'),
-      supportedLocales: const [Locale('es', 'CO'), Locale('es')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B3A5C)),
+    final error = startupError;
+    if (error != null) {
+      return MaterialApp(
+        title: 'EyeSight AI',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        home: _StartupErrorView(message: error),
+      );
+    }
+    final theme = Get.find<ThemeController>();
+    return Obx(
+      () => GetMaterialApp(
+        title: 'EyeSight AI',
+        debugShowCheckedModeBanner: false,
+        locale: _locale,
+        fallbackLocale: _locale,
+        supportedLocales: _locales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        theme: theme.light,
+        darkTheme: theme.dark,
+        themeMode: ThemeMode.system,
+        initialRoute: AppRoutes.splash,
+        getPages: AppPages.pages,
       ),
-      home: _StatusScreen(error: startupError),
     );
   }
 }
 
-class _StatusScreen extends StatelessWidget {
-  const _StatusScreen({this.error});
+class _StartupErrorView extends StatelessWidget {
+  const _StartupErrorView({required this.message});
 
-  final String? error;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text('EyeSight AI', style: text.headlineLarge),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  error ?? 'Bloque 2: detección de obstáculos en el teléfono.',
-                  textAlign: TextAlign.center,
-                  style: text.titleMedium,
-                ),
-                const SizedBox(height: 32),
-                FilledButton.icon(
-                  icon: const Icon(Icons.center_focus_strong),
-                  label: const Text('Probar detección'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const DetectionDebugView(),
-                    ),
-                  ),
-                ),
-              ],
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
           ),
         ),
