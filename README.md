@@ -22,8 +22,8 @@ diagrama de desarrollo por capas del numeral 4.3.5:
 lib/
   core/          IA (decodificador YOLO, letterbox), seguridad, métricas, configuración
   domain/        entidades, interfaces de repositorios y reglas de negocio (sin plugins)
-  data/          repositorios Hive cifrados                         (Bloque 1)
-  presentation/  vistas, widgets con Semantics y controladores GetX (Bloques 3 y 4)
+  data/          repositorios Hive cifrados
+  presentation/  inyección de dependencias (bindings); vistas y controladores GetX (Bloques 3 y 4)
 test/            pruebas unitarias, de widgets y con el modelo real
 ml/              entrenamiento y exportación del modelo en Python   (Bloque 2)
 ```
@@ -65,7 +65,16 @@ flutter run
 Ultralytics) y compara el resultado con una referencia calculada en Python con LiteRT, de modo
 que el decodificador de la aplicación queda verificado contra el modelo real.
 
-## Seguridad
+## Seguridad (módulo `lib/core/security`, informe numeral 4.3.7)
+
+| Componente | Función | Amenaza STRIDE |
+|---|---|---|
+| `SecureKeyService` | Genera la clave AES-256 y la guarda en el Android Keystore | Divulgación |
+| `EncryptedStorage` | Abre las colecciones de Hive cifradas con esa clave | Divulgación, manipulación |
+| `PinGuard` | PIN del acompañante con PBKDF2 y bloqueo de 60 s tras 5 fallos | Suplantación |
+| `DataWipeService` | Borra colecciones, clave y PIN | Divulgación |
+| `AuditRepository` | Registra creación, edición y eliminación de zonas | Repudio |
+| `AndroidManifest.xml` | Sin copia de seguridad, sin tráfico HTTP, permisos mínimos | Divulgación, elevación de privilegios |
 
 - Sin claves de API, sin archivos `.env` y sin servidores.
 - Las claves de firma (`*.jks`, `key.properties`) están excluidas del repositorio.
