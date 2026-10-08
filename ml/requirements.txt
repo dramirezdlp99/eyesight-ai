@@ -1,0 +1,6 @@
+# Entrenamiento y evaluación (Google Colab o un equipo con GPU)
+ultralytics>=8.3,<9
+pyyaml>=6
+numpy>=1.24
+# Pruebas de los módulos propios
+pytest>=8
