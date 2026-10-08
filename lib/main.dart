@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'presentation/bindings/app_bindings.dart';
+import 'presentation/views/debug/detection_debug_view.dart';
 
 /// Punto de entrada de EyeSight AI.
 ///
-/// Bloque 1: abre el almacenamiento cifrado y registra las dependencias.
-/// La interfaz completa llega en los bloques 3 y 4.
+/// Bloque 2: almacenamiento cifrado, dependencias y prueba de detección con
+/// la cámara. La interfaz completa llega en los bloques 3 y 4.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   String? startupError;
@@ -63,10 +64,19 @@ class _StatusScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  error ??
-                      'Bloque 1: almacenamiento cifrado y seguridad listos.',
+                  error ?? 'Bloque 2: detección de obstáculos en el teléfono.',
                   textAlign: TextAlign.center,
                   style: text.titleMedium,
+                ),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  icon: const Icon(Icons.center_focus_strong),
+                  label: const Text('Probar detección'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DetectionDebugView(),
+                    ),
+                  ),
                 ),
               ],
             ),
