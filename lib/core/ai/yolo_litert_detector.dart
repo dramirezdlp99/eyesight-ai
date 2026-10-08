@@ -268,7 +268,9 @@ TensorKind _kindOf(TensorType type) => switch (type) {
       run: (bytes) {
         input.data = bytes;
         interpreter.invoke();
-        return Uint8List.fromList(output.data);
+        // Vista directa del tensor de salida, sin copiarlo: se decodifica en
+        // este mismo hilo antes de la siguiente inferencia.
+        return output.data;
       },
     );
     init.reply.send(_WorkerReady(inbox, io));
