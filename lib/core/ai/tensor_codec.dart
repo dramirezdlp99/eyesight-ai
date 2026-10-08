@@ -71,6 +71,11 @@ abstract final class TensorCodec {
   static Float32List decodeOutput(Uint8List raw, ModelIO io) {
     switch (io.outputKind) {
       case TensorKind.float32:
+        // Sin copia cuando la memoria está alineada (caso normal en LiteRT).
+        if (raw.offsetInBytes % 4 == 0 && Endian.host == Endian.little) {
+          return raw.buffer
+              .asFloat32List(raw.offsetInBytes, raw.lengthInBytes ~/ 4);
+        }
         final data = ByteData.sublistView(raw);
         final out = Float32List(raw.length ~/ 4);
         for (var i = 0; i < out.length; i++) {
