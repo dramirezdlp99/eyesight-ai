@@ -1,0 +1,9 @@
+{
+  "name": "yolov8n-coco-preentrenado",
+  "file": "eyesight_yolov8n.tflite",
+  "labels": "labels.txt",
+  "sha256": "ce614a5bd27a619f36dd124c1678d3b0f518d0de0d10a26a6418d23b2e06c50a",
+  "input_size": 320,
+  "quantization": "float32",
+  "source": "Ultralytics YOLOv8n preentrenado en COCO, sin ajuste fino (modelo base de la hipótesis, numeral 2.3)"
+}
