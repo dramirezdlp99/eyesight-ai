@@ -26,3 +26,19 @@ jobs:
         run: flutter analyze --no-fatal-infos
       - name: Pruebas con cobertura
         run: flutter test --coverage
+
+  modelo:
+    name: Pruebas del entrenamiento (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependencias
+        run: pip install pyyaml numpy pytest
+      - name: Pruebas
+        run: python -m pytest -q
