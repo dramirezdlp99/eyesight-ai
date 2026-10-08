@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'presentation/bindings/app_bindings.dart';
+
 /// Punto de entrada de EyeSight AI.
 ///
-/// Bloque 0: núcleo y dominio. La interfaz completa (perfiles, escáner,
-/// zonas y pantallas del acompañante) se incorpora en los bloques siguientes.
-void main() {
+/// Bloque 1: abre el almacenamiento cifrado y registra las dependencias.
+/// La interfaz completa llega en los bloques 3 y 4.
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const EyeSightApp());
+  String? startupError;
+  try {
+    await AppBindings.init();
+  } on Object catch (e) {
+    startupError = 'No se pudo abrir el almacenamiento cifrado: $e';
+  }
+  runApp(EyeSightApp(startupError: startupError));
 }
 
 class EyeSightApp extends StatelessWidget {
-  const EyeSightApp({super.key});
+  const EyeSightApp({super.key, this.startupError});
+
+  /// Mensaje si falló el arranque; la app lo muestra en lugar de cerrarse.
+  final String? startupError;
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +36,15 @@ class EyeSightApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B3A5C)),
       ),
-      home: const _BlockZeroScreen(),
+      home: _StatusScreen(error: startupError),
     );
   }
 }
 
-class _BlockZeroScreen extends StatelessWidget {
-  const _BlockZeroScreen();
+class _StatusScreen extends StatelessWidget {
+  const _StatusScreen({this.error});
+
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +63,8 @@ class _BlockZeroScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Bloque 0: núcleo y dominio verificados con pruebas.',
+                  error ??
+                      'Bloque 1: almacenamiento cifrado y seguridad listos.',
                   textAlign: TextAlign.center,
                   style: text.titleMedium,
                 ),
