@@ -12,5 +12,6 @@ void main() {
       isSemantics(isHeader: true, label: 'EyeSight AI'),
     );
     expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.text('Probar detección'), findsOneWidget);
   });
 }
