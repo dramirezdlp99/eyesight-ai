@@ -66,10 +66,9 @@ manipulación). Hoy se incluye YOLOv8n **preentrenado en COCO** (modelo base de 
 modelo **ajustado e INT8** se produce con `ml/` y se instala con `ml/scripts/export.py`.
 
 La inferencia corre con LiteRT en un hilo aislado que hace la conversión YUV, la inferencia y la
-NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla del escáner y en la del
-acompañante, muestra la
-cámara con las cajas, los cuadros por segundo y los tiempos de inferencia y de captura a
-resultado (RNF01 a RNF03).
+NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla del
+acompañante, muestra la cámara con las cajas, los cuadros por segundo y los tiempos de
+inferencia y de captura a resultado (RNF01 a RNF03).
 
 ## Identidad visual y accesibilidad
 
@@ -88,6 +87,26 @@ ojo queda quieto.
 
 Al abrir la app por primera vez se anuncian los perfiles por voz y se pueden elegir hablando o con
 los botones (HU01). El perfil de acompañante pide crear o ingresar un PIN.
+
+## Escáner (HU02 a HU09)
+
+`ScannerController` une la cámara, el modelo, el filtro de estabilidad, la política de alertas,
+la voz, la vibración, el GPS y los comandos. Inicia solo al abrir la app en los perfiles de
+usuario final, anuncia «Escáner activo» y recuerda que la herramienta complementa el bastón
+(RNF16).
+
+| Acción | Voz | Gesto (ceguera total) | Botón (baja visión) |
+|---|---|---|---|
+| Repetir la última alerta | «repetir» | Doble toque | Repetir |
+| Silenciar la voz 10 s (lo cercano sigue vibrando) | «silencio» | Deslizar a un lado | Silenciar |
+| Marcar una zona de riesgo | «marcar zona» | Mantener presionado 2 s | Marcar zona |
+| Terminar (pide confirmación) | «terminar» y luego «sí» | — | Terminar |
+
+Con TalkBack activo, las mismas acciones están en el menú de acciones del área del escáner.
+Las alertas siguen el formato «Poste, cerca, al frente» y vibran con 3, 2 o 1 pulsos según la
+cercanía; las zonas registradas avisan con un pulso largo y «Atención: hueco a 15 metros».
+Los obstáculos fijos peligrosos que se detectan cerca, con GPS de 20 m o mejor, se registran
+como zonas automáticas, y cada alerta queda en el historial cifrado.
 
 ## Pruebas
 
