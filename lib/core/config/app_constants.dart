@@ -118,4 +118,19 @@ abstract final class AppConstants {
 
   /// Inicio del escáner (HU02, CA1).
   static const Duration scannerStartGoal = Duration(seconds: 3);
+
+  /// Fallos seguidos del modelo antes de avisar por voz (RNF16).
+  static const int detectionFailuresToWarn = 3;
+
+  // ------------------------------------------------------------ Escáner
+  /// Ventana de escucha de cada comando de voz (HU09).
+  static const Duration commandListenWindow = Duration(seconds: 8);
+
+  /// Intervalo mínimo entre intentos de registrar la misma clase como zona
+  /// (evita consultar el repositorio en cada cuadro).
+  static const Duration zoneRegistrationThrottle = Duration(seconds: 5);
+
+  /// Antigüedad máxima de la última posición GPS para usarla en el
+  /// historial y en el registro automático de zonas.
+  static const Duration positionMaxAge = Duration(seconds: 10);
 }
