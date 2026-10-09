@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:eyesight_ai/core/ai/i_obstacle_detector.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
 import 'package:eyesight_ai/core/device/speech_service.dart';
+import 'package:eyesight_ai/core/device/video_source_selector.dart';
 import 'package:eyesight_ai/core/device/voice_input.dart';
+import 'package:eyesight_ai/core/device/wakelock_service.dart';
 import 'package:eyesight_ai/core/security/data_wipe_service.dart';
 import 'package:eyesight_ai/core/security/encrypted_storage.dart';
 import 'package:eyesight_ai/core/security/pin_guard.dart';
@@ -57,6 +60,9 @@ void main() {
     expect(Get.isRegistered<IHaptics>(), isTrue);
     expect(Get.isRegistered<ILocationService>(), isTrue);
     expect(Get.isRegistered<IPermissionGuard>(), isTrue);
+    expect(Get.isRegistered<IWakelock>(), isTrue);
+    expect(Get.isRegistered<IObstacleDetector>(), isTrue);
+    expect(Get.isRegistered<VideoSourceSelector>(), isTrue);
     expect(Get.find<ThemeController>().profile.value, isNull);
   });
 
