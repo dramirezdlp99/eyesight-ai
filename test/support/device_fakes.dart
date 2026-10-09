@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:eyesight_ai/core/device/haptics.dart';
@@ -33,26 +34,48 @@ class FakeSpeech implements ISpeechService {
 
 /// Reconocimiento de voz falso: devuelve las respuestas programadas, una por
 /// cada escucha, y `null` cuando se acaban.
+///
+/// Con [blocking], cuando no quedan respuestas la escucha queda abierta
+/// hasta que se llama a [stop], como el micrófono real.
 class FakeVoice implements IVoiceInput {
-  FakeVoice([List<String?> answers = const []]) : _answers = Queue.of(answers);
+  FakeVoice([List<String?> answers = const [], this.blocking = false])
+      : _answers = Queue.of(answers);
 
   final Queue<String?> _answers;
+  final bool blocking;
   bool available = true;
   int listens = 0;
   int stops = 0;
+  Completer<String?>? _open;
 
   @override
   Future<bool> init() async => available;
 
   @override
-  Future<String?> listenOnce(
-      {Duration timeout = const Duration(seconds: 8)}) async {
+  Future<String?> listenOnce({
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
     listens++;
-    return _answers.isEmpty ? null : _answers.removeFirst();
+    if (_answers.isNotEmpty) {
+      return _answers.removeFirst();
+    }
+    if (!blocking) {
+      return null;
+    }
+    final open = Completer<String?>();
+    _open = open;
+    return open.future;
   }
 
   @override
-  Future<void> stop() async => stops++;
+  Future<void> stop() async {
+    stops++;
+    final open = _open;
+    _open = null;
+    if (open != null && !open.isCompleted) {
+      open.complete(null);
+    }
+  }
 }
 
 class FakeHaptics implements IHaptics {
