@@ -5,28 +5,36 @@ import '../../core/config/app_constants.dart';
 import '../../domain/entities/detection.dart';
 import '../../domain/entities/proximity.dart';
 import '../../domain/usecases/alert_policy.dart';
+import '../theme/app_colors.dart';
 
 /// Dibuja la franja de trayectoria y las cajas detectadas sobre la imagen
-/// de la cámara (wireframe de la HU03). Expone un resumen accesible para
-/// TalkBack (RNF06).
+/// de la cámara (wireframe de la HU03).
+///
+/// Con [announce] expone un resumen accesible para TalkBack (RNF06); el
+/// escáner lo desactiva porque ya anuncia las alertas por voz.
 class DetectionOverlay extends StatelessWidget {
-  const DetectionOverlay({super.key, required this.detections});
+  const DetectionOverlay({
+    super.key,
+    required this.detections,
+    this.announce = true,
+  });
 
   final List<Detection> detections;
+  final bool announce;
 
   @override
   Widget build(BuildContext context) {
+    final paint = CustomPaint(
+      painter: DetectionPainter(detections),
+      child: const SizedBox.expand(),
+    );
+    if (!announce) {
+      return ExcludeSemantics(child: paint);
+    }
     final summary = detections.isEmpty
         ? 'Sin obstáculos detectados'
         : detections.map(AlertPolicy.messageFor).join('. ');
-    return Semantics(
-      label: summary,
-      liveRegion: true,
-      child: CustomPaint(
-        painter: DetectionPainter(detections),
-        child: const SizedBox.expand(),
-      ),
-    );
+    return Semantics(label: summary, liveRegion: true, child: paint);
   }
 }
 
@@ -35,26 +43,32 @@ class DetectionPainter extends CustomPainter {
 
   final List<Detection> detections;
 
-  static Color colorFor(Proximity proximity) => switch (proximity) {
-        Proximity.near => const Color(0xFFE53935),
-        Proximity.medium => const Color(0xFFFFB300),
-        Proximity.far => const Color(0xFFB0BEC5),
-      };
+  static Color colorFor(Proximity proximity) =>
+      AppColors.forProximity(proximity);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final band = Rect.fromLTRB(
-      AppConstants.pathBandLeft * size.width,
-      AppConstants.pathBandTop * size.height,
-      AppConstants.pathBandRight * size.width,
-      size.height,
+    // Franja de trayectoria: trapecio central inferior (numeral 2.5.8).
+    final top = AppConstants.pathBandTop * size.height;
+    final left = AppConstants.pathBandLeft * size.width;
+    final right = AppConstants.pathBandRight * size.width;
+    final narrow = (right - left) * 0.2;
+    final band = Path()
+      ..moveTo(left + narrow, top)
+      ..lineTo(right - narrow, top)
+      ..lineTo(right, size.height)
+      ..lineTo(left, size.height)
+      ..close();
+    canvas.drawPath(
+      band,
+      Paint()..color = AppColors.cobalt.withValues(alpha: 0.16),
     );
-    canvas.drawRect(
+    canvas.drawPath(
       band,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5
-        ..color = Colors.white.withValues(alpha: 0.6),
+        ..strokeWidth = 2
+        ..color = Colors.white.withValues(alpha: 0.75),
     );
 
     for (final d in detections) {
@@ -65,29 +79,39 @@ class DetectionPainter extends CustomPainter {
         d.box.right * size.width,
         d.box.bottom * size.height,
       );
-      canvas.drawRect(
-        rect,
+      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(12));
+      canvas.drawRRect(
+        rrect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = d.inPath ? 4 : 2
+          ..strokeWidth = d.inPath ? 4 : 2.5
           ..color = color,
       );
       final label = TextPainter(
         text: TextSpan(
-          text: ' ${ObstacleCatalog.spanishName(d.label)} · '
-              '${d.proximity.spoken} ${d.confidence.toStringAsFixed(2)} ',
+          text: '${ObstacleCatalog.spanishName(d.label)} '
+              '${d.confidence.toStringAsFixed(2).replaceAll('.', ',')}',
           style: TextStyle(
-            color: Colors.black,
-            backgroundColor: color,
+            color: AppColors.onProximity(d.proximity),
             fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
         textDirection: TextDirection.ltr,
       )..layout(maxWidth: size.width);
-      final dy =
-          rect.top - label.height < 0 ? rect.top : rect.top - label.height;
-      label.paint(canvas, Offset(rect.left, dy));
+      final chip = Rect.fromLTWH(
+        rect.left,
+        rect.top - label.height - 10 < 0
+            ? rect.top
+            : rect.top - label.height - 10,
+        label.width + 20,
+        label.height + 8,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(chip, const Radius.circular(999)),
+        Paint()..color = color,
+      );
+      label.paint(canvas, chip.topLeft.translate(10, 4));
     }
   }
 
