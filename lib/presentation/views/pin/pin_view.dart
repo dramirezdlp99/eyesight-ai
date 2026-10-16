@@ -3,78 +3,163 @@ import 'package:get/get.dart';
 
 import '../../../core/config/app_constants.dart';
 import '../../controllers/pin_controller.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/greca.dart';
 
-/// PIN del acompañante (wireframe de la HU01, figura b).
+/// PIN del acompañante (HU01 CA3, RNF10), diseño «Barniz de Pasto».
 class PinView extends GetView<PinController> {
   const PinView({super.key});
 
+  static String get rules =>
+      'De ${AppConstants.minPinLength} a ${AppConstants.maxPinLength} '
+      'dígitos · ${AppConstants.maxPinAttempts} intentos antes de esperar '
+      '${AppConstants.pinLockDuration.inSeconds} s';
+
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Acompañante')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Obx(
-            () => Column(
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    controller.title,
-                    textAlign: TextAlign.center,
-                    style: text.titleLarge,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Semantics(
-                  label:
-                      '${controller.entered.value.length} dígitos ingresados',
-                  excludeSemantics: true,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < AppConstants.maxPinLength; i++)
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: scheme.primary, width: 2),
-                            color: i < controller.entered.value.length
-                                ? scheme.primary
-                                : null,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Semantics(
+      body: Obx(
+        () => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Header(
+                title: controller.title,
+                count: controller.entered.value.length,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Semantics(
                   liveRegion: true,
                   child: Text(
                     controller.error.value ?? ' ',
                     textAlign: TextAlign.center,
-                    style: text.bodyLarge?.copyWith(color: scheme.error),
+                    style: text.bodyLarge?.copyWith(
+                      color: scheme.error,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                _Keypad(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: _Keypad(
                   onDigit: controller.addDigit,
                   onBackspace: controller.backspace,
                   onSubmit: controller.busy.value ? null : controller.submit,
                 ),
-                const SizedBox(height: 16),
-                TextButton(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: TextButton.icon(
+                  icon: const Icon(Icons.swap_horiz),
                   onPressed: controller.changeProfile,
-                  child: const Text('Cambiar de perfil'),
+                  label: const Text('Cambiar de perfil'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Cabecera esmeralda con la greca, el título y los puntos del PIN.
+class _Header extends StatelessWidget {
+  const _Header({required this.title, required this.count});
+
+  final String title;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+      child: ColoredBox(
+        color: AppColors.esmeralda,
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: GrecaCorner(
+                color: AppColors.esmeraldaDeep,
+                accent: AppColors.oro,
+                width: 120,
+                height: 88,
+              ),
+            ),
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 26),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.supervisor_account,
+                          color: AppColors.paper,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Acompañante',
+                          style: text.titleMedium?.copyWith(
+                            color: AppColors.paper,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        title,
+                        style: AppText.display(34, color: AppColors.paper),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      PinView.rules,
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.paper,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Semantics(
+                      label: '$count dígitos ingresados',
+                      excludeSemantics: true,
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < AppConstants.maxPinLength; i++)
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.only(right: 12),
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: i < count ? AppColors.paper : null,
+                                border: Border.all(
+                                  color: AppColors.paper,
+                                  width: 2.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -94,27 +179,43 @@ class _Keypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget key(String label, VoidCallback? onTap, {String? semantic}) =>
+    final scheme = Theme.of(context).colorScheme;
+    Widget key(
+      Widget child,
+      VoidCallback? onTap, {
+      required String semantic,
+      Color? background,
+      Color? foreground,
+    }) =>
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(5),
             child: Semantics(
               button: true,
-              label: semantic ?? label,
+              label: semantic,
               excludeSemantics: true,
-              child: FilledButton.tonal(
+              child: FilledButton(
                 onPressed: onTap,
-                style: FilledButton.styleFrom(minimumSize: const Size(64, 64)),
-                child: Text(label,
-                    style: Theme.of(context).textTheme.headlineSmall),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(64, 64),
+                  backgroundColor: background ?? scheme.surfaceContainerHighest,
+                  foregroundColor: foreground ?? scheme.onSurface,
+                  padding: EdgeInsets.zero,
+                ),
+                child: child,
               ),
             ),
           ),
         );
 
-    Widget row(List<String> digits) => Row(
-          children: [for (final d in digits) key(d, () => onDigit(d))],
+    Widget digit(String d) => key(
+          Text(d, style: AppText.display(28)),
+          () => onDigit(d),
+          semantic: d,
         );
+
+    Widget row(List<String> digits) =>
+        Row(children: [for (final d in digits) digit(d)]);
 
     return Column(
       children: [
@@ -123,9 +224,22 @@ class _Keypad extends StatelessWidget {
         row(['7', '8', '9']),
         Row(
           children: [
-            key('⌫', onBackspace, semantic: 'Borrar'),
-            key('0', () => onDigit('0')),
-            key('OK', onSubmit, semantic: 'Confirmar'),
+            key(
+              const Icon(Icons.backspace_outlined),
+              onBackspace,
+              semantic: 'Borrar',
+            ),
+            digit('0'),
+            key(
+              const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Entrar'),
+              ),
+              onSubmit,
+              semantic: 'Entrar',
+              background: AppColors.esmeralda,
+              foreground: AppColors.paper,
+            ),
           ],
         ),
       ],
