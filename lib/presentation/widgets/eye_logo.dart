@@ -2,17 +2,27 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Logotipo animado de EyeSight AI: un ojo que parpadea, mueve la pupila y
-/// emite ondas que representan la percepción del entorno.
+import '../theme/app_colors.dart';
+import 'motion.dart';
+
+/// Logotipo animado de EyeSight AI: un ojo sobre una baldosa cobalto que
+/// parpadea y mira a los lados, con el iris en oro.
 ///
-/// Conserva la idea del logotipo animado de la versión preliminar y la
-/// mejora. Si el teléfono tiene activado «Quitar animaciones», el ojo se
-/// muestra abierto y quieto (accesibilidad).
+/// Conserva la idea del logotipo animado de la versión preliminar. Si el
+/// teléfono tiene activado «Quitar animaciones», el ojo queda abierto y
+/// quieto (accesibilidad). Con [closed] se muestra cerrado (escáner
+/// detenido).
 class EyeLogo extends StatefulWidget {
-  const EyeLogo({super.key, this.size = 160, this.animate = true});
+  const EyeLogo({
+    super.key,
+    this.size = 132,
+    this.animate = true,
+    this.closed = false,
+  });
 
   final double size;
   final bool animate;
+  final bool closed;
 
   @override
   State<EyeLogo> createState() => _EyeLogoState();
@@ -27,8 +37,20 @@ class _EyeLogoState extends State<EyeLogo> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    if (widget.animate && !reduceMotion) {
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(EyeLogo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animate != widget.animate ||
+        oldWidget.closed != widget.closed) {
+      _sync();
+    }
+  }
+
+  void _sync() {
+    if (widget.animate && !widget.closed && !reduceMotionOf(context)) {
       if (!_controller.isAnimating) {
         _controller.repeat();
       }
@@ -47,7 +69,6 @@ class _EyeLogoState extends State<EyeLogo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Semantics(
       label: 'EyeSight AI',
       image: true,
@@ -59,12 +80,12 @@ class _EyeLogoState extends State<EyeLogo> with SingleTickerProviderStateMixin {
             final t = _controller.value;
             return CustomPaint(
               painter: EyePainter(
-                openness: EyePainter.opennessAt(t),
-                pupilShift: math.sin(t * 2 * math.pi),
-                ripple: t,
-                stroke: scheme.primary,
-                sclera: scheme.surface,
-                pupil: scheme.onSurface,
+                openness: widget.closed ? 0 : EyePainter.opennessAt(t),
+                pupilShift: widget.closed ? 0 : EyePainter.lookAt(t),
+                tile: AppColors.cobalt,
+                sclera: AppColors.paper,
+                iris: AppColors.oro,
+                pupil: AppColors.ink,
               ),
             );
           },
@@ -78,22 +99,20 @@ class EyePainter extends CustomPainter {
   const EyePainter({
     required this.openness,
     required this.pupilShift,
-    required this.ripple,
-    required this.stroke,
+    required this.tile,
     required this.sclera,
+    required this.iris,
     required this.pupil,
   });
 
   /// 1 = abierto, 0 = cerrado.
   final double openness;
 
-  /// Desplazamiento horizontal de la pupila (−1 a 1).
+  /// Desplazamiento horizontal de la mirada (−1 a 1).
   final double pupilShift;
-
-  /// Fase de las ondas (0 a 1).
-  final double ripple;
-  final Color stroke;
+  final Color tile;
   final Color sclera;
+  final Color iris;
   final Color pupil;
 
   /// Parpadeo rápido cerca del final de cada ciclo.
@@ -108,35 +127,49 @@ class EyePainter extends CustomPainter {
     return 1 - closed;
   }
 
+  /// Mirada: al frente, a la izquierda y luego a la derecha.
+  static double lookAt(double t) {
+    double ease(double a, double b, double x) {
+      final p = ((x - a) / (b - a)).clamp(0.0, 1.0);
+      return 0.5 - 0.5 * math.cos(p * math.pi);
+    }
+
+    if (t < 0.40) {
+      return 0;
+    }
+    if (t < 0.70) {
+      return -ease(0.40, 0.55, t);
+    }
+    if (t < 0.86) {
+      return -1 + 1.8 * ease(0.70, 0.84, t);
+    }
+    return 0.8 * (1 - ease(0.86, 1.0, t));
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final s = math.min(size.width, size.height);
     final c = Offset(size.width / 2, size.height / 2);
+    final tileRect = Rect.fromCenter(center: c, width: s, height: s);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(tileRect, Radius.circular(s * 0.3)),
+      Paint()..color = tile,
+    );
 
-    // Ondas de percepción.
-    for (var k = 0; k < 2; k++) {
-      final p = (ripple + k * 0.5) % 1;
-      canvas.drawCircle(
-        c,
-        s * 0.33 + p * s * 0.16,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = s * 0.018
-          ..color = stroke.withValues(alpha: (1 - p) * 0.45),
-      );
-    }
-
-    final w = s * 0.64;
-    final open = openness < 0 ? 0.0 : (openness > 1 ? 1.0 : openness);
-    final h = s * 0.30 * open;
-    final outline = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = s * 0.035
-      ..strokeCap = StrokeCap.round
-      ..color = stroke;
-
-    if (h < s * 0.02) {
-      canvas.drawLine(c.translate(-w / 2, 0), c.translate(w / 2, 0), outline);
+    final w = s * 0.7;
+    final open = openness.clamp(0.0, 1.0);
+    final h = s * 0.32 * open;
+    if (h < s * 0.03) {
+      // Ojo cerrado: un párpado curvo con pestañas.
+      final lid = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = s * 0.06
+        ..strokeCap = StrokeCap.round
+        ..color = sclera;
+      final path = Path()
+        ..moveTo(c.dx - w / 2, c.dy)
+        ..quadraticBezierTo(c.dx, c.dy + s * 0.16, c.dx + w / 2, c.dy);
+      canvas.drawPath(path, lid);
       return;
     }
 
@@ -146,28 +179,25 @@ class EyePainter extends CustomPainter {
       ..quadraticBezierTo(c.dx, c.dy + h, c.dx - w / 2, c.dy)
       ..close();
     canvas.drawPath(eye, Paint()..color = sclera);
-
     canvas.save();
     canvas.clipPath(eye);
-    final iris = c.translate(pupilShift * s * 0.07, 0);
-    canvas.drawCircle(iris, s * 0.125, Paint()..color = stroke);
-    canvas.drawCircle(iris, s * 0.058, Paint()..color = pupil);
+    final center = c.translate(pupilShift * s * 0.08, 0);
+    canvas.drawCircle(center, s * 0.17, Paint()..color = iris);
+    canvas.drawCircle(center, s * 0.075, Paint()..color = pupil);
     canvas.drawCircle(
-      iris.translate(-s * 0.03, -s * 0.03),
-      s * 0.018,
+      center.translate(-s * 0.045, -s * 0.045),
+      s * 0.028,
       Paint()..color = sclera,
     );
     canvas.restore();
-
-    canvas.drawPath(eye, outline);
   }
 
   @override
   bool shouldRepaint(EyePainter old) =>
       old.openness != openness ||
       old.pupilShift != pupilShift ||
-      old.ripple != ripple ||
-      old.stroke != stroke ||
+      old.tile != tile ||
       old.sclera != sclera ||
+      old.iris != iris ||
       old.pupil != pupil;
 }
