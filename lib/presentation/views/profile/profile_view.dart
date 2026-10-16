@@ -3,78 +3,185 @@ import 'package:get/get.dart';
 
 import '../../../domain/entities/user_profile.dart';
 import '../../controllers/profile_controller.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/eye_logo.dart';
+import '../../widgets/greca.dart';
+import '../../widgets/motion.dart';
 
-/// Selección de perfil (wireframe de la HU01, figura a).
+/// Selección de perfil (HU01, diseño «Barniz de Pasto»).
+///
+/// Tres tarjetas de color: cobalto para ceguera total, negro con oro para
+/// baja visión y esmeralda para el acompañante.
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-          children: [
-            const Center(child: EyeLogo(size: 110)),
-            const SizedBox(height: 16),
-            Semantics(
-              header: true,
-              child: Text(
-                'EyeSight AI',
-                textAlign: TextAlign.center,
-                style: text.headlineMedium,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const EyeLogo(size: 44),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'EyeSight AI',
+                      style: AppText.display(22, color: scheme.onSurface),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '¿Cómo vas a usar la aplicación?',
-              textAlign: TextAlign.center,
-              style: text.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Di tu perfil en voz alta o toca un botón.',
-              textAlign: TextAlign.center,
-              style: text.bodyLarge,
-            ),
-            const SizedBox(height: 32),
-            for (final p in UserProfile.values) ...[
-              _ProfileButton(profile: p, onTap: () => controller.select(p)),
-              const SizedBox(height: 16),
-            ],
-            const SizedBox(height: 8),
-            Obx(
-              () => Semantics(
-                liveRegion: true,
+              const SizedBox(height: 24),
+              Semantics(
+                header: true,
                 child: Text(
-                  _status(controller.phase.value, controller.heard.value),
-                  textAlign: TextAlign.center,
-                  style: text.bodyLarge,
+                  '¿Cómo usará la aplicación?',
+                  style: AppText.display(34, color: scheme.onSurface),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 14),
+              Obx(
+                () => _ListeningChip(
+                  phase: controller.phase.value,
+                  heard: controller.heard.value,
+                ),
+              ),
+              const SizedBox(height: 20),
+              StaggeredEntrance(
+                gap: 12,
+                children: [
+                  _ProfileCard(
+                    profile: UserProfile.totalBlindness,
+                    onTap: () => controller.select(UserProfile.totalBlindness),
+                  ),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _ProfileCard(
+                            profile: UserProfile.lowVision,
+                            compact: true,
+                            onTap: () =>
+                                controller.select(UserProfile.lowVision),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _ProfileCard(
+                            profile: UserProfile.companion,
+                            compact: true,
+                            onTap: () =>
+                                controller.select(UserProfile.companion),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Icon(Icons.lock_outline, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'El perfil se recuerda en este teléfono',
+                      style: text.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
-  static String _status(ProfilePhase phase, String? heard) => switch (phase) {
-        ProfilePhase.listening => 'Escuchando…',
-        ProfilePhase.speaking =>
-          heard == null ? 'Hablando…' : 'Escuché: «$heard»',
-        ProfilePhase.idle => 'Elige tu perfil con los botones.',
-        ProfilePhase.done => '',
-      };
 }
 
-class _ProfileButton extends StatelessWidget {
-  const _ProfileButton({required this.profile, required this.onTap});
+/// Indica si la app habla, escucha o espera un toque.
+class _ListeningChip extends StatelessWidget {
+  const _ListeningChip({required this.phase, required this.heard});
+
+  final ProfilePhase phase;
+  final String? heard;
+
+  static String status(ProfilePhase phase, String? heard) => switch (phase) {
+        ProfilePhase.listening => 'Le escucho.',
+        ProfilePhase.speaking =>
+          heard == null ? 'Le hablo…' : 'Escuché: «$heard»',
+        ProfilePhase.idle => 'Elija su perfil con los botones.',
+        ProfilePhase.done => 'Perfil elegido.',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final listening = phase == ProfilePhase.listening;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 44,
+            height: 28,
+            child: Center(
+              child: listening
+                  ? WaveBars(color: scheme.primary, height: 26)
+                  : Icon(Icons.mic_none, color: scheme.primary),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Semantics(
+              liveRegion: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(status(phase, heard), style: text.titleMedium),
+                  Text(
+                    'Diga su perfil o toque una opción.',
+                    style: text.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileCard extends StatelessWidget {
+  const _ProfileCard({
+    required this.profile,
+    required this.onTap,
+    this.compact = false,
+  });
 
   final UserProfile profile;
   final VoidCallback onTap;
+  final bool compact;
 
   static String title(UserProfile p) => switch (p) {
         UserProfile.totalBlindness => 'Ceguera total',
@@ -83,9 +190,9 @@ class _ProfileButton extends StatelessWidget {
       };
 
   static String hint(UserProfile p) => switch (p) {
-        UserProfile.totalBlindness => 'Alertas por voz y vibración',
-        UserProfile.lowVision => 'Además, pantalla de alto contraste',
-        UserProfile.companion => 'Configura y gestiona las zonas, con PIN',
+        UserProfile.totalBlindness => 'Le guío con voz, vibración y gestos',
+        UserProfile.lowVision => 'Letra grande y alto contraste',
+        UserProfile.companion => 'Zonas y ajustes, con PIN',
       };
 
   static IconData icon(UserProfile p) => switch (p) {
@@ -94,40 +201,82 @@ class _ProfileButton extends StatelessWidget {
         UserProfile.companion => Icons.supervisor_account,
       };
 
+  /// Fondo, texto y acento de la greca de cada perfil.
+  static (Color, Color, Color, Color) colors(UserProfile p) => switch (p) {
+        UserProfile.totalBlindness => (
+            AppColors.cobalt,
+            AppColors.paper,
+            AppColors.cobaltDeep,
+            AppColors.oro,
+          ),
+        UserProfile.lowVision => (
+            AppColors.ink,
+            AppColors.oro,
+            AppColors.inkSoft,
+            AppColors.oro,
+          ),
+        UserProfile.companion => (
+            AppColors.esmeralda,
+            AppColors.paper,
+            AppColors.esmeraldaDeep,
+            AppColors.paper,
+          ),
+      };
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final (background, foreground, step, accent) = colors(profile);
     return Semantics(
       button: true,
       label: '${title(profile)}. ${hint(profile)}',
+      onTap: onTap,
       excludeSemantics: true,
-      child: Material(
-        color: scheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: scheme.primary, width: 2),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-            child: Row(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: compact ? 168 : 150),
+        child: Material(
+          color: background,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: InkWell(
+            onTap: onTap,
+            child: Stack(
               children: [
-                Icon(icon(profile), size: 40, color: scheme.primary),
-                const SizedBox(width: 20),
-                Expanded(
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GrecaCorner(
+                    color: step,
+                    accent: accent,
+                    width: compact ? 70 : 130,
+                    height: compact ? 52 : 92,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(title(profile), style: text.titleLarge),
-                      const SizedBox(height: 4),
+                      Icon(icon(profile), size: 34, color: foreground),
+                      SizedBox(height: compact ? 22 : 18),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          title(profile),
+                          style: AppText.display(
+                            compact ? 26 : 32,
+                            color: foreground,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Text(
                         hint(profile),
-                        style: text.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                        style: text.bodyMedium?.copyWith(color: foreground),
                       ),
                     ],
                   ),
