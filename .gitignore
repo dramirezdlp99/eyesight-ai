@@ -30,6 +30,7 @@ android/app/release
 # Entrenamiento del modelo (numeral 3.13.2)
 ml/.venv/
 ml/datasets/
+ml/videos/
 ml/runs/
 ml/**/*.pt
 ml/**/*.onnx
