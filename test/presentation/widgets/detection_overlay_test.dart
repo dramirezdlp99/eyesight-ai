@@ -27,6 +27,16 @@ void main() {
     expect(find.bySemanticsLabel('Sin obstáculos detectados'), findsOneWidget);
   });
 
+  testWidgets('en el escáner no repite por TalkBack lo que ya dice la voz',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DetectionOverlay(detections: [det('pole')], announce: false),
+      ),
+    );
+    expect(find.bySemanticsLabel('Poste, cerca, al frente'), findsNothing);
+  });
+
   test('colores distintos por cercanía y repintado solo con datos nuevos', () {
     expect(DetectionPainter.colorFor(Proximity.near),
         isNot(DetectionPainter.colorFor(Proximity.far)));
