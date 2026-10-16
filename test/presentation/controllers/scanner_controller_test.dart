@@ -424,7 +424,7 @@ void main() {
 
     test('sin alertas, «repetir» lo informa', () async {
       await started();
-      c.repeatLast();
+      c.repeat();
       expect(speech.spoken.single, ScannerController.noAlertMessage);
     });
 
@@ -483,6 +483,65 @@ void main() {
       expect(voice.listens, greaterThan(0));
       await c.stopScan();
       expect(voice.stops, greaterThan(0));
+    });
+  });
+
+  group('estado para la pantalla (diseño Barniz de Pasto)', () {
+    test('la alerta guarda la decisión, las cajas y el contador', () async {
+      await started();
+      await frames(3, [det('person')]);
+      expect(c.lastAlert.value?.message, 'Persona, cerca, al frente');
+      expect(c.detections.single.label, 'person');
+      expect(c.alertCount.value, 1);
+      await frame([]);
+      expect(c.detections, isEmpty);
+    });
+
+    test('una zona automática nueva se muestra y se cuenta', () async {
+      location.position = pos(at: t0);
+      await started();
+      await c.pollZones();
+      expect(c.gpsReady.value, isTrue);
+      await frames(3, [det('pole')]);
+      expect(c.savedZone.value?.type, 'pole');
+      expect(c.zoneCount.value, 1);
+    });
+
+    test('con el tipo elegido en pantalla guarda sin preguntar', () async {
+      location.position = pos(at: t0);
+      await started(listen: true);
+      await c.markZone('step');
+      expect(c.dialog.value, ScannerDialog.none);
+      expect(
+          speech.spoken, isNot(contains(ScannerController.askZoneTypeMessage)));
+      expect(c.savedZone.value?.type, 'step');
+      expect(speech.spoken.last, 'Zona de escalón guardada.');
+    });
+
+    test('el aviso de zona se muestra y una alerta nueva lo reemplaza',
+        () async {
+      zones.zones['z1'] = zone(lat: pastoLat + metersToLat(15));
+      location.position = pos(at: t0);
+      await started();
+      await c.pollZones();
+      expect(c.activeZone.value?.distanceM.round(), 15);
+      expect(c.headlineProximity.value, isNull);
+      await frames(3, [det('person')]);
+      expect(c.activeZone.value, isNull);
+      expect(c.headlineProximity.value, Proximity.near);
+    });
+
+    test('sin GPS lo indica en pantalla', () async {
+      location.ready = false;
+      await started();
+      expect(c.gpsReady.value, isFalse);
+    });
+
+    test('al detener guarda la duración de la sesión', () async {
+      await started();
+      now = now.add(const Duration(minutes: 18));
+      await c.stopScan();
+      expect(c.sessionLength.value, const Duration(minutes: 18));
     });
   });
 }
