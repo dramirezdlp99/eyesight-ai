@@ -8,6 +8,7 @@ import '../../core/ai/frame_gate.dart';
 import '../../core/ai/i_obstacle_detector.dart';
 import '../../core/ai/obstacle_catalog.dart';
 import '../../core/config/app_constants.dart';
+import '../../core/device/alert_manager.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/i_video_source.dart';
 import '../../core/device/location_service.dart';
@@ -21,6 +22,7 @@ import '../../domain/entities/detection.dart';
 import '../../domain/entities/detection_record.dart';
 import '../../domain/entities/geo_position.dart';
 import '../../domain/entities/proximity.dart';
+import '../../domain/entities/risk_zone.dart';
 import '../../domain/repositories/i_history_repository.dart';
 import '../../domain/repositories/i_settings_repository.dart';
 import '../../domain/repositories/i_zone_repository.dart';
@@ -41,7 +43,7 @@ enum ScannerDialog {
   /// «¿Qué tipo de riesgo?» al marcar una zona (HU07).
   zoneType,
 
-  /// «¿Deseas terminar el escáner?» (HU09, CA3).
+  /// «¿Desea terminar el escáner?» (HU09, CA3).
   confirmStop,
 }
 
@@ -55,8 +57,8 @@ typedef PeriodicTimerFactory = Timer Function(
 /// Orquesta el escáner del usuario final (HU02 a HU09, diagrama de clases).
 ///
 /// Une la fuente de video, el detector, el filtro de estabilidad, la
-/// política de alertas, la voz, la vibración, los comandos de voz, los
-/// gestos y la memoria georreferenciada de zonas de riesgo.
+/// política de alertas, el [AlertManager] (voz y vibración), los comandos de
+/// voz, los gestos y la memoria georreferenciada de zonas de riesgo.
 class ScannerController extends GetxController with WidgetsBindingObserver {
   ScannerController({
     required IObstacleDetector detector,
@@ -79,7 +81,6 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
         _sources = sources,
         _speech = speech,
         _voice = voice,
-        _haptics = haptics,
         _location = location,
         _permissions = permissions,
         _wakelock = wakelock,
@@ -88,13 +89,13 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
         _history = history,
         _zoneService = zoneService,
         _clock = clock ?? DateTime.now,
-        _periodic = periodic ?? Timer.periodic;
+        _periodic = periodic ?? Timer.periodic,
+        alerts = AlertManager(speech: speech, haptics: haptics);
 
   final IObstacleDetector _detector;
   final VideoSourceSelector _sources;
   final ISpeechService _speech;
   final IVoiceInput _voice;
-  final IHaptics _haptics;
   final ILocationService _location;
   final IPermissionGuard _permissions;
   final IWakelock _wakelock;
@@ -105,6 +106,9 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
   final DateTime Function() _clock;
   final PeriodicTimerFactory _periodic;
 
+  /// Voz y vibración de las alertas.
+  final AlertManager alerts;
+
   /// Inicia el escáner al abrir la pantalla (HU02, CA1).
   final bool autoStart;
 
@@ -114,29 +118,29 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
 
   // ------------------------------------------------------------- Mensajes
   static const String startedMessage =
-      'Escáner activo. EyeSight AI complementa tu bastón, no lo reemplaza.';
+      'Escáner activo. EyeSight AI complementa su bastón, no lo reemplaza.';
   static const String usbFallbackMessage =
       'La cámara USB no está conectada. Uso la cámara del teléfono.';
   static const String cameraDeniedMessage =
       'Sin permiso de cámara no puedo detectar obstáculos. '
-      'Actívalo en los ajustes del teléfono.';
+      'Actívelo en los ajustes del teléfono.';
   static const String cameraFailedMessage =
-      'No pude abrir la cámara. Usa tu bastón con precaución.';
+      'No pude abrir la cámara. Use su bastón con precaución.';
   static const String detectionFailedMessage =
-      'Falla en la detección de obstáculos. Usa tu bastón con precaución.';
+      'Falla en la detección de obstáculos. Use su bastón con precaución.';
   static const String noGpsMessage =
       'Sin señal GPS precisa. Las zonas de riesgo no están disponibles por ahora.';
   static const String noVoiceMessage =
-      'Los comandos de voz no están disponibles. Usa los gestos.';
+      'Los comandos de voz no están disponibles. Use los gestos.';
   static const String mutedMessage = 'Silencio por 10 segundos.';
   static const String noAlertMessage = 'Todavía no hay alertas.';
   static const String askZoneTypeMessage =
-      '¿Qué tipo de riesgo? Di: hueco, escalón, obra u otro.';
+      '¿Qué tipo de riesgo es? Diga: hueco, escalón, obra u otro.';
   static const String zoneCanceledMessage = 'No se guardó la zona.';
   static const String zoneNoGpsMessage =
       'No fue posible registrar la zona: no hay señal GPS precisa.';
   static const String askStopMessage =
-      '¿Deseas terminar el escáner? Di sí o no.';
+      '¿Desea terminar el escáner? Diga sí o no.';
   static const String continueMessage = 'El escáner sigue activo.';
   static const String stoppedMessage = 'Escáner detenido.';
 
@@ -148,15 +152,29 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
 
   // ------------------------------------------------------- Estado visible
   final Rx<ScanState> state = ScanState.idle.obs;
-  final RxString status = 'Preparando el escáner…'.obs;
+  final RxString status = 'Preparando el escáner'.obs;
 
-  /// Último aviso (obstáculo o zona) en texto, para la vista de alto
-  /// contraste (HU05) y el comando «repetir» (HU09).
+  /// Último aviso (obstáculo o zona) en texto, para el comando «repetir»
+  /// (HU09) y la vista de baja visión (HU05).
   final RxString headline = ''.obs;
 
   /// Cercanía del último obstáculo anunciado; `null` para avisos de zona.
   final Rxn<Proximity> headlineProximity = Rxn<Proximity>();
+
+  /// Última alerta de obstáculo (tarjeta de color de la pantalla).
+  final Rxn<AlertDecision> lastAlert = Rxn<AlertDecision>();
+
+  /// Aviso de zona vigente (tarjeta oro con ondas, HU08).
+  final Rxn<ZoneWarning> activeZone = Rxn<ZoneWarning>();
+
+  /// Última zona guardada, automática o manual (aviso verde, HU06 y HU07).
+  final Rxn<RiskZone> savedZone = Rxn<RiskZone>();
+
+  /// Detecciones del último cuadro, para dibujar las cajas.
+  final RxList<Detection> detections = <Detection>[].obs;
+
   final RxBool muted = false.obs;
+  final RxBool gpsReady = false.obs;
   final Rx<ScannerDialog> dialog = ScannerDialog.none.obs;
 
   /// Métricas en vivo (RNF01 a RNF03, HU02 CA1 y HU03 CA5).
@@ -165,13 +183,21 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
   final RxInt captureToAlertMs = 0.obs;
   final RxInt startupMs = 0.obs;
 
+  /// Resumen de la sesión (pantalla de escáner detenido).
+  final RxInt alertCount = 0.obs;
+  final RxInt zoneCount = 0.obs;
+  final Rx<Duration> sessionLength = Duration.zero.obs;
+
   /// `true` si el reconocimiento de voz está disponible.
   bool get voiceReady => _voiceReady;
+
+  /// Fuente de video activa, para mostrar la vista previa de la cámara.
+  IVideoSource? get videoSource => _source;
 
   // ------------------------------------------------------- Estado interno
   final FrameGate _gate = FrameGate();
   final StabilityFilter _stability = StabilityFilter();
-  final AlertPolicy _alerts = AlertPolicy();
+  final AlertPolicy _policy = AlertPolicy();
   final ZoneMonitor _monitor = ZoneMonitor();
   final Map<String, DateTime> _lastZoneAttempt = {};
 
@@ -180,13 +206,12 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
   StreamSubscription<CameraFrame>? _frames;
   Timer? _pollTimer;
   GeoPosition? _lastPosition;
-  DateTime? _mutedUntil;
   DateTime? _dialogDeadline;
+  DateTime? _sessionStart;
   bool _voiceReady = false;
   bool _gpsWarned = false;
   bool _resumeOnReturn = false;
   int _failures = 0;
-  int _speaking = 0;
   int _loopId = 0;
   int _listenGeneration = 0;
   int _windowCount = 0;
@@ -242,21 +267,22 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     }
     final began = _clock();
     state.value = ScanState.starting;
-    status.value = 'Iniciando el escáner…';
+    status.value = 'Iniciando el escáner';
     _config = await _settings.load();
+    alerts.vibration = _config.vibration;
     await _speech.configure(rate: _config.speechRate, volume: _config.volume);
 
     // CA2: explica para qué se usa el permiso antes de pedirlo.
     if (!await _ensurePermission(AppPermission.camera)) {
       _fail('Sin permiso de cámara');
-      await _say(cameraDeniedMessage);
+      await alerts.say(cameraDeniedMessage);
       return;
     }
     try {
       await _detector.load();
     } on Object {
       _fail('El modelo no se pudo cargar');
-      await _say(detectionFailedMessage);
+      await alerts.say(detectionFailedMessage);
       return;
     }
     final VideoSourceChoice choice;
@@ -266,7 +292,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       frames = await choice.source.start();
     } on Object {
       _fail('No se pudo abrir la cámara');
-      await _say(cameraFailedMessage);
+      await alerts.say(cameraFailedMessage);
       return;
     }
     if (state.value != ScanState.starting) {
@@ -275,7 +301,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       return;
     }
     _source = choice.source;
-    _resetSession();
+    _resetSession(began);
     // Se cancela en stopScan().
     // ignore: cancel_subscriptions
     _frames = frames.listen((frame) => unawaited(processFrame(frame)));
@@ -284,9 +310,9 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     status.value = 'Escáner activo';
     startupMs.value = _clock().difference(began).inMilliseconds;
 
-    await _say(startedMessage);
+    await alerts.say(startedMessage);
     if (choice.fellBack) {
-      await _say(usbFallbackMessage);
+      await alerts.say(usbFallbackMessage);
     }
     await _startLocation();
     if (listenForCommands) {
@@ -299,26 +325,35 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     status.value = reason;
   }
 
-  void _resetSession() {
+  void _resetSession(DateTime began) {
     _gate.reset();
     _stability.reset();
-    _alerts.reset();
+    _policy.reset();
     _monitor.reset();
+    alerts.reset();
     _lastZoneAttempt.clear();
     _failures = 0;
-    _mutedUntil = null;
-    muted.value = false;
     _gpsWarned = false;
     _windowCount = 0;
     _windowStart = null;
+    _sessionStart = began;
+    muted.value = false;
     dialog.value = ScannerDialog.none;
+    headline.value = '';
+    headlineProximity.value = null;
+    lastAlert.value = null;
+    activeZone.value = null;
+    savedZone.value = null;
+    detections.clear();
+    alertCount.value = 0;
+    zoneCount.value = 0;
   }
 
   Future<bool> _ensurePermission(AppPermission permission) async {
     if (await _permissions.isGranted(permission)) {
       return true;
     }
-    await _say(permissionReason(permission));
+    await alerts.say(permissionReason(permission));
     return _permissions.request(permission);
   }
 
@@ -336,6 +371,10 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     if (wasActive) {
       state.value = ScanState.stopped;
       status.value = 'Escáner detenido';
+      final start = _sessionStart;
+      if (start != null) {
+        sessionLength.value = _clock().difference(start);
+      }
     }
     final frames = _frames;
     _frames = null;
@@ -348,7 +387,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       await _wakelock.disable();
     }
     if (announce) {
-      await _say(stoppedMessage);
+      await alerts.say(stoppedMessage);
     }
   }
 
@@ -372,7 +411,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
         _failures++;
         if (_failures == AppConstants.detectionFailuresToWarn) {
           status.value = 'Falla en la detección';
-          unawaited(_say(detectionFailedMessage));
+          unawaited(alerts.say(detectionFailedMessage));
         }
         return;
       }
@@ -386,10 +425,11 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       final now = _clock();
       _updateRate(now);
       inferenceMs.value = result.inferenceMicros ~/ 1000;
-      muted.value = _isMuted(now);
+      muted.value = alerts.isMuted(now);
+      detections.assignAll(result.detections);
 
       final confirmed = _stability.update(result.detections);
-      final decision = _alerts.decide(confirmed, now);
+      final decision = _policy.decide(confirmed, now);
       if (decision != null) {
         _emit(decision, frame.capturedAt, now);
       }
@@ -416,15 +456,11 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     captureToAlertMs.value = now.difference(capturedAt).inMilliseconds;
     headline.value = decision.message;
     headlineProximity.value = d.proximity;
+    lastAlert.value = decision;
+    activeZone.value = null;
+    alertCount.value++;
+    alerts.announce(decision, now);
 
-    final isMuted = _isMuted(now);
-    // HU09 CA2: en silencio se mantiene la vibración de lo que está cerca.
-    if (_config.vibration && (!isMuted || d.proximity == Proximity.near)) {
-      unawaited(_haptics.play(decision.vibrationPattern));
-    }
-    if (!isMuted) {
-      unawaited(_say(decision.message));
-    }
     final position = _recentPosition(now);
     unawaited(
       _history.add(
@@ -455,11 +491,15 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       }
       _lastZoneAttempt[key] = now;
       try {
-        await _zoneService.registerDetection(
+        final result = await _zoneService.registerDetection(
           d,
           _recentPosition(now),
           _config,
         );
+        if (result is ZoneCreated) {
+          savedZone.value = result.zone;
+          zoneCount.value++;
+        }
       } on Object {
         // Un error al guardar no debe detener la detección (RNF05).
       }
@@ -480,9 +520,10 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
   Future<void> _startLocation() async {
     final allowed = await _ensurePermission(AppPermission.location);
     final ready = allowed && await _location.ensureReady();
+    gpsReady.value = ready;
     if (!ready) {
       _gpsWarned = true;
-      await _say(noGpsMessage);
+      await alerts.say(noGpsMessage);
     }
     if (state.value == ScanState.scanning) {
       _pollTimer?.cancel();
@@ -503,40 +544,37 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     final now = _clock();
     if (position == null ||
         position.accuracyM > AppConstants.maxAccuracyToWarnM) {
+      gpsReady.value = false;
       // RNF05: sin GPS la detección continúa y se avisa una vez.
       if (!_gpsWarned) {
         _gpsWarned = true;
-        if (!_isMuted(now)) {
-          await _say(noGpsMessage);
+        if (!alerts.isMuted(now)) {
+          await alerts.say(noGpsMessage);
         }
       }
       return;
     }
     _gpsWarned = false;
+    gpsReady.value = true;
     _lastPosition = position;
     final warning = _monitor.check(position, await _zones.all(), now);
     if (warning != null && state.value == ScanState.scanning) {
       headline.value = warning.message;
       headlineProximity.value = null;
-      // HU04 CA3: pulso largo, distinto a los de obstáculos.
-      if (_config.vibration) {
-        unawaited(_haptics.play(HapticPatterns.zone));
-      }
-      if (!_isMuted(now)) {
-        await _say(warning.message);
-      }
+      activeZone.value = warning;
+      await alerts.warnZone(warning, now);
     }
   }
 
   // --------------------------------------------- Comandos y gestos (HU09)
 
   /// Repite el último aviso (comando «repetir» o doble toque).
-  void repeatLast() {
+  void repeat() {
     if (state.value != ScanState.scanning) {
       return;
     }
     final text = headline.value;
-    unawaited(_say(text.isEmpty ? noAlertMessage : text));
+    unawaited(alerts.say(text.isEmpty ? noAlertMessage : text));
   }
 
   /// Pausa la voz 10 s; la vibración de lo cercano continúa (HU09, CA2).
@@ -544,50 +582,52 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     if (state.value != ScanState.scanning) {
       return;
     }
-    unawaited(_say(mutedMessage));
-    _mutedUntil = _clock().add(AppConstants.muteDuration);
+    unawaited(alerts.say(mutedMessage));
+    alerts.mute(_clock());
     muted.value = true;
   }
 
-  bool _isMuted(DateTime now) {
-    final until = _mutedUntil;
-    return until != null && now.isBefore(until);
-  }
-
-  /// Marca una zona de riesgo (comando «marcar zona» o pulsación de 2 s,
-  /// HU07). Pregunta el tipo por voz.
-  Future<void> markZone() async {
+  /// Marca una zona de riesgo (comando «marcar zona», pulsación de 2 s o
+  /// botón, HU07).
+  ///
+  /// Sin [type] pregunta el tipo por voz; con [type] la guarda de una vez.
+  Future<void> markZone([String? type]) async {
+    if (type != null) {
+      await _saveManualZone(type);
+      return;
+    }
     if (state.value != ScanState.scanning ||
         dialog.value != ScannerDialog.none) {
       return;
     }
     if (!_voiceReady) {
       // Sin reconocimiento de voz se guarda como riesgo genérico.
-      await chooseZoneType('other');
+      await _saveManualZone('other');
       return;
     }
     await _ask(ScannerDialog.zoneType, askZoneTypeMessage);
   }
 
-  /// Tipo de riesgo elegido por voz o con los botones.
-  Future<void> chooseZoneType(String type) async {
+  Future<void> _saveManualZone(String type) async {
     dialog.value = ScannerDialog.none;
     final position = await _location.current();
     final result = await _zoneService.registerManual(type, position, _config);
     switch (result) {
       case ZoneCreated(:final zone) || ZoneIncremented(:final zone):
-        if (_config.vibration) {
-          unawaited(_haptics.play(HapticPatterns.zone));
+        savedZone.value = zone;
+        if (result is ZoneCreated) {
+          zoneCount.value++;
         }
-        await _say(zoneSavedMessage(zone.type));
+        alerts.confirmZone();
+        await alerts.say(zoneSavedMessage(zone.type));
       case ZoneSkipped():
-        await _say(zoneNoGpsMessage);
+        await alerts.say(zoneNoGpsMessage);
     }
   }
 
   Future<void> cancelZone() async {
     dialog.value = ScannerDialog.none;
-    await _say(zoneCanceledMessage);
+    await alerts.say(zoneCanceledMessage);
   }
 
   /// Pide confirmación antes de detener (HU09, CA3).
@@ -604,7 +644,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     if (confirmed) {
       await stopScan(announce: true);
     } else {
-      await _say(continueMessage);
+      await alerts.say(continueMessage);
     }
   }
 
@@ -616,7 +656,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       unawaited(_voice.stop());
     }
     _dialogDeadline = null;
-    await _say(question);
+    await alerts.say(question);
     _dialogDeadline = _clock().add(AppConstants.manualZoneAnswerTimeout);
   }
 
@@ -634,7 +674,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       case ScannerDialog.none:
         switch (command) {
           case VoiceCommand.repeat:
-            repeatLast();
+            repeat();
           case VoiceCommand.mute:
             mute();
           case VoiceCommand.markZone:
@@ -652,7 +692,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
         final type =
             text == null ? null : VoiceCommandParser.parseZoneType(text);
         if (type != null) {
-          await chooseZoneType(type);
+          await markZone(type);
         } else if (_expired(now)) {
           // HU07 CA3: sin respuesta en 8 s no se guarda.
           await cancelZone();
@@ -671,12 +711,12 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
   Future<void> _startVoice() async {
     if (!await _ensurePermission(AppPermission.microphone)) {
       _voiceReady = false;
-      await _say(noVoiceMessage);
+      await alerts.say(noVoiceMessage);
       return;
     }
     _voiceReady = await _voice.init();
     if (!_voiceReady) {
-      await _say(noVoiceMessage);
+      await alerts.say(noVoiceMessage);
       return;
     }
     if (state.value == ScanState.scanning) {
@@ -719,19 +759,8 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _waitUntilSilent() async {
     final limit = _clock().add(const Duration(seconds: 6));
-    while (_speaking > 0 && _clock().isBefore(limit)) {
+    while (alerts.speaking && _clock().isBefore(limit)) {
       await Future<void>.delayed(const Duration(milliseconds: 150));
-    }
-  }
-
-  Future<void> _say(String text) async {
-    _speaking++;
-    try {
-      await _speech.speak(text);
-    } on Object {
-      // Si la voz falla, la vibración y la pantalla siguen funcionando.
-    } finally {
-      _speaking--;
     }
   }
 }
