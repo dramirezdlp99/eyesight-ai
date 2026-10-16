@@ -130,7 +130,7 @@ void main() {
     register(tester, const AppSettings(profile: UserProfile.companion));
     await tester.pumpWidget(const EyeSightApp());
     await passSplash(tester);
-    expect(find.text('Crea un PIN de 4 a 6 dígitos'), findsOneWidget);
+    expect(find.text('Cree un PIN de 4 a 6 dígitos'), findsOneWidget);
   });
 
   testWidgets('si falla el arranque muestra el error en lugar de cerrarse',
