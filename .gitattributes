@@ -7,3 +7,4 @@
 *.tflite binary
 *.jks binary
 *.f32 binary
+*.ttf binary
