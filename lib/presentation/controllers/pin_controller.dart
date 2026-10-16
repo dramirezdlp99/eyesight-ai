@@ -39,9 +39,9 @@ class PinController extends GetxController {
   String _first = '';
 
   String get title => switch (mode.value) {
-        PinMode.create => 'Crea un PIN de 4 a 6 dígitos',
-        PinMode.confirm => 'Repite el PIN',
-        PinMode.verify => 'Ingresa el PIN',
+        PinMode.create => 'Cree un PIN de 4 a 6 dígitos',
+        PinMode.confirm => 'Repita el PIN',
+        PinMode.verify => 'Ingrese su PIN',
       };
 
   @override
@@ -86,12 +86,12 @@ class PinController extends GetxController {
           }
           _first = pin;
           mode.value = PinMode.confirm;
-          await _speech.speak('Repite el PIN.');
+          await _speech.speak('Repita el PIN.');
         case PinMode.confirm:
           if (pin != _first) {
             _first = '';
             mode.value = PinMode.create;
-            error.value = 'Los PIN no coinciden. Créalo de nuevo.';
+            error.value = 'Los PIN no coinciden. Créelo de nuevo.';
             return;
           }
           await _guard.setPin(pin);
@@ -106,7 +106,7 @@ class PinController extends GetxController {
                   'PIN incorrecto. Quedan $remainingAttempts intentos.';
             case PinLocked(:final remaining):
               error.value =
-                  'Demasiados intentos. Espera ${remaining.inSeconds} segundos.';
+                  'Demasiados intentos. Espere ${remaining.inSeconds} segundos.';
             case PinNotSet():
               mode.value = PinMode.create;
           }
