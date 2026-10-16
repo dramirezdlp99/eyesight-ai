@@ -33,12 +33,12 @@ class ProfileController extends GetxController {
   final bool autoStart;
 
   static const String welcome =
-      'Te damos la bienvenida a EyeSight AI. Di: ceguera total, baja visión o '
-      'acompañante. También puedes tocar uno de los tres botones.';
+      'Bienvenido a EyeSight AI. Diga: ceguera total, baja visión o '
+      'acompañante. También puede tocar uno de los tres botones.';
   static const String retry =
-      'No entendí. Di: ceguera total, baja visión o acompañante.';
+      'No le entendí. Diga: ceguera total, baja visión o acompañante.';
   static const String fallback =
-      'No entendí. Puedes elegir tu perfil con los botones de la pantalla.';
+      'No le entendí. Puede elegir su perfil con los botones de la pantalla.';
 
   /// Intentos de voz antes de pasar a los botones (HU01, CA4).
   static const int maxVoiceAttempts = 2;
@@ -98,7 +98,7 @@ class ProfileController extends GetxController {
     phase.value = ProfilePhase.done;
     await _voice.stop();
     if (profile == UserProfile.companion) {
-      await _speech.speak('Perfil acompañante. Ingresa el PIN.');
+      await _speech.speak('Perfil acompañante. Ingrese el PIN.');
       _navigate(AppRoutes.pin);
       return;
     }
