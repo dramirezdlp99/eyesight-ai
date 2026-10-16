@@ -10,6 +10,9 @@ YOLOv8n preentrenado en COCO como modelo base. Esta carpeta produce el modelo aj
 | `eyesight_ml/dataset.py` | Une exportaciones YOLOv8 de Roboflow y reasigna clases |
 | `eyesight_ml/metrics.py` | Precisión, recall, F1, AP@0,5 (101 puntos) y bootstrap pareado para la hipótesis |
 | `eyesight_ml/manifest.py` | Copia el modelo a `assets/models` con su SHA-256 |
+| `eyesight_ml/frames.py` | Elige cuadros nítidos de los videos (1 por segundo, varianza del laplaciano) |
+| `scripts/extract_frames.py` | Paso 0: cuadros de los videos grabados en Pasto, con caras difuminadas |
+| `GUIA-GRABACION.md` | Cómo grabar el conjunto de prueba de Pasto y etiquetarlo en Roboflow |
 | `scripts/prepare_dataset.py` | Paso 1: arma el conjunto de datos |
 | `scripts/train.py` | Paso 2: ajuste fino de YOLOv8n a 320 px |
 | `scripts/evaluate.py` | Paso 3: caso de prueba CP-01 y tabla para el numeral 4.4.2 |
