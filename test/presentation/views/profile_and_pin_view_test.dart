@@ -54,7 +54,7 @@ void main() {
         tester.getSemantics(find.text('Baja visión')),
         isSemantics(
           isButton: true,
-          label: 'Baja visión. Además, pantalla de alto contraste',
+          label: 'Baja visión. Letra grande y alto contraste',
         ),
       );
       // La lista solo construye lo que cabe en pantalla: se desplaza hasta el
@@ -114,17 +114,17 @@ void main() {
         await tester.tap(find.text(d));
         await tester.pump();
       }
-      await tester.tap(find.text('OK'));
+      await tester.tap(find.text('Entrar'));
       await tester.pump();
     }
 
     testWidgets('crear el PIN con el teclado entra como acompañante',
         (tester) async {
       final guard = await pumpPin(tester);
-      expect(find.text('Crea un PIN de 4 a 6 dígitos'), findsOneWidget);
+      expect(find.text('Cree un PIN de 4 a 6 dígitos'), findsOneWidget);
 
       await typeAndConfirm(tester, '2468');
-      expect(find.text('Repite el PIN'), findsOneWidget);
+      expect(find.text('Repita el PIN'), findsOneWidget);
 
       await typeAndConfirm(tester, '2468');
       expect(await guard.hasPin(), isTrue);
