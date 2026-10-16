@@ -116,7 +116,7 @@ void main() {
       type(c, '1111');
       await c.submit();
     }
-    expect(c.error.value, contains('Espera 60 segundos'));
+    expect(c.error.value, contains('Espere 60 segundos'));
 
     type(c, '2468');
     await c.submit();
