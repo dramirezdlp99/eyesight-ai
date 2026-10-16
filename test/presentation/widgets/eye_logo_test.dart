@@ -31,21 +31,34 @@ void main() {
     expect(find.byType(EyeLogo), findsOneWidget);
   });
 
+  testWidgets('cerrado (escáner detenido) no anima', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Center(child: EyeLogo(closed: true))),
+    );
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  test('la mirada vuelve al frente al final del ciclo', () {
+    expect(EyePainter.lookAt(0.2), 0);
+    expect(EyePainter.lookAt(0.6), lessThan(0));
+    expect(EyePainter.lookAt(1.0), closeTo(0, 0.01));
+  });
+
   test('repinta solo si cambia algo', () {
     const a = EyePainter(
       openness: 1,
       pupilShift: 0,
-      ripple: 0,
-      stroke: Colors.blue,
+      tile: Colors.blue,
       sclera: Colors.white,
+      iris: Colors.amber,
       pupil: Colors.black,
     );
     const b = EyePainter(
       openness: 0.5,
       pupilShift: 0,
-      ripple: 0,
-      stroke: Colors.blue,
+      tile: Colors.blue,
       sclera: Colors.white,
+      iris: Colors.amber,
       pupil: Colors.black,
     );
     expect(a.shouldRepaint(a), isFalse);
