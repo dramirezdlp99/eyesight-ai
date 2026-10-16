@@ -70,28 +70,50 @@ NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla del
 acompañante, muestra la cámara con las cajas, los cuadros por segundo y los tiempos de
 inferencia y de captura a resultado (RNF01 a RNF03).
 
-## Identidad visual y accesibilidad
+El modelo propio se evalúa con imágenes de Pasto. `ml/GUIA-GRABACION.md` explica cómo grabarlas y
+`ml/scripts/extract_frames.py` extrae los cuadros nítidos de los videos.
 
-Diseño propio, sin elementos de terceros: un ojo animado que parpadea y emite ondas
-(`lib/presentation/widgets/eye_logo.dart`) y tres temas en `lib/presentation/theme/`:
+## Identidad visual y accesibilidad: «Barniz de Pasto»
 
-| Tema | Uso | Colores |
+Diseño propio inspirado en el barniz de Pasto (mopa-mopa) y en las grecas escalonadas de Nariño,
+sin elementos de terceros. La base es blanca y sobria, y cada color tiene un solo significado:
+
+| Color | Hex | Significado |
 |---|---|---|
-| Claro | Ceguera total y acompañante, con el teléfono en modo claro | Azul `#1A4B8C` sobre blanco |
-| Oscuro | Los mismos perfiles, con el teléfono en modo oscuro | Azul `#8DB9FF` sobre `#0D141F` |
-| Alto contraste | Siempre en el perfil de baja visión (HU05) | Amarillo `#FFD600` sobre negro, texto de 24 sp o más |
+| Cobalto | `#2340D9` | Marca y acciones; perfil de ceguera total |
+| Carmín | `#D11F3A` | Peligro cercano |
+| Oro | `#F2B705` | Atención: media distancia, avisos de zona y perfil de baja visión |
+| Esmeralda | `#00875A` | Acompañante y confirmaciones (zona guardada) |
+| Tinta | `#17171C` | Texto |
 
-Todos los pares de texto y fondo cumplen al menos 4,5:1 (RNF07), verificado por
-`test/presentation/theme/app_theme_test.dart`. Con «Quitar animaciones» activado en Android, el
-ojo queda quieto.
+- **Tipografías** (licencia OFL, incluidas en `assets/fonts` para funcionar sin internet):
+  Atkinson Hyperlegible Next, creada por el Braille Institute para personas con baja visión,
+  para el texto; Bricolage Grotesque para los títulos.
+- **Temas** en `lib/presentation/theme/`: claro, oscuro y alto contraste. El de alto contraste se
+  usa siempre en el perfil de baja visión (HU05) y pone oro y blanco sobre negro, con texto de
+  24 sp o más.
+- **Animaciones** en `lib/presentation/widgets/`:
+  - el ojo del logotipo parpadea y mira a los lados;
+  - la greca avanza en la bienvenida;
+  - una línea recorre la cámara mientras el modelo analiza;
+  - unos puntos laten con los pulsos de vibración;
+  - unas ondas acompañan el aviso de zona;
+  - una cuenta regresiva marca los 8 s para responder.
 
-Al abrir la app por primera vez se anuncian los perfiles por voz y se pueden elegir hablando o con
-los botones (HU01). El perfil de acompañante pide crear o ingresar un PIN.
+  Con «Quitar animaciones» activado en Android, todo queda quieto.
+- Todos los pares de texto y fondo cumplen al menos 4,5:1 (RNF07, WCAG 2.1). Lo verifica
+  `test/presentation/theme/app_theme_test.dart`. Los botones miden 56 dp o más.
+- La app trata al usuario de «usted».
+
+Al abrir la app por primera vez, se anuncian los perfiles por voz y se pueden elegir hablando o
+con las tarjetas (HU01). El perfil de acompañante pide crear o ingresar un PIN.
 
 ## Escáner (HU02 a HU09)
 
 `ScannerController` une la cámara, el modelo, el filtro de estabilidad, la política de alertas,
-la voz, la vibración, el GPS y los comandos. Inicia solo al abrir la app en los perfiles de
+el `AlertManager` (voz y vibración), el GPS y los comandos. La pantalla muestra la cámara con las
+cajas detectadas, la tarjeta de la última alerta con el color de su cercanía, el aviso de zona y
+el resumen de la sesión al detenerse. Inicia solo al abrir la app en los perfiles de
 usuario final, anuncia «Escáner activo» y recuerda que la herramienta complementa el bastón
 (RNF16).
 
