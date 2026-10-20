@@ -10,7 +10,10 @@ import '../../widgets/companion_ui.dart';
 
 /// Privacidad y datos (HU14, RF02, RF20).
 class PrivacyView extends GetView<PrivacyController> {
-  const PrivacyView({super.key});
+  const PrivacyView({super.key, this.onBack});
+
+  /// Botón «Volver» de la cabecera (vuelve al Mapa).
+  final VoidCallback? onBack;
 
   static String permissionName(AppPermission p) => switch (p) {
         AppPermission.camera => 'Cámara',
@@ -28,6 +31,7 @@ class PrivacyView extends GetView<PrivacyController> {
         padding: EdgeInsets.zero,
         children: [
           CompanionHeader(
+            onBack: onBack,
             title: 'Privacidad',
             subtitle: 'Sus datos no salen de este teléfono. Cifrados con '
                 'AES-256; la clave vive en el Android Keystore. Sin cuentas '
