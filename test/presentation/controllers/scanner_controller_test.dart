@@ -461,6 +461,23 @@ void main() {
       expect(speech.spoken.last, ScannerController.stoppedMessage);
     });
 
+    test('«atrás» pregunta antes de terminar y cancela las preguntas',
+        () async {
+      location.position = pos(at: t0);
+      await started(listen: true);
+      await c.back();
+      expect(c.dialog.value, ScannerDialog.confirmStop);
+      await c.back();
+      expect(c.dialog.value, ScannerDialog.none);
+      expect(c.state.value, ScanState.scanning);
+      expect(speech.spoken.last, ScannerController.continueMessage);
+      await c.markZone();
+      await c.back();
+      expect(c.dialog.value, ScannerDialog.none);
+      expect(speech.spoken.last, ScannerController.zoneCanceledMessage);
+      expect(zones.zones, isEmpty);
+    });
+
     test('CA3: con «no» el escáner sigue activo', () async {
       await started(listen: true);
       await c.handleVoice('terminar');
