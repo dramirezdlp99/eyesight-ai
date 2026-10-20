@@ -156,9 +156,10 @@ void main() {
 
   testWidgets('«atrás» vuelve al Mapa y desde el Mapa pregunta antes de salir',
       (tester) async {
+    var changes = 0;
     await pump(
       tester,
-      CompanionShellView(baseMap: false, onChangeProfile: () {}),
+      CompanionShellView(baseMap: false, onChangeProfile: () => changes++),
     );
     // La primera es la de las pestañas; la lista desplegable del Historial
     // usa otra por dentro.
@@ -172,6 +173,18 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pump();
     expect(stack().index, 0);
+    // El botón «Volver» de la cabecera también regresa al Mapa.
+    await tester.tap(
+      find.descendant(of: find.byType(PillNav), matching: find.text('Ajustes')),
+    );
+    await tester.pump();
+    expect(stack().index, 2);
+    await tester.tap(find.text('Volver').hitTestable());
+    await tester.pump();
+    expect(stack().index, 0);
+    // Desde el Mapa se cambia de perfil sin cerrar la app.
+    await tester.tap(find.text('Cambiar de perfil').hitTestable());
+    expect(changes, 1);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('¿Salir de EyeSight AI?'), findsOneWidget);
