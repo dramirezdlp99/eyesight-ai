@@ -137,7 +137,9 @@ void main() {
         onChangeProfile: () => profileChanges++,
       ),
     );
-    IndexedStack stack() => tester.widget(find.byType(IndexedStack));
+    // La primera es la de las pestañas; la lista desplegable del Historial
+    // usa otra por dentro.
+    IndexedStack stack() => tester.widget(find.byType(IndexedStack).first);
     expect(stack().index, 0);
     for (final (i, tab) in CompanionTab.values.indexed) {
       await tester.tap(
@@ -148,6 +150,34 @@ void main() {
       expect(stack().index, i);
     }
     expect(tester.takeException(), isNull);
+    // La píldora mide lo que sus botones, no toda la pantalla.
+    expect(tester.getSize(find.byType(PillNav)).height, lessThan(120));
+  });
+
+  testWidgets('«atrás» vuelve al Mapa y desde el Mapa pregunta antes de salir',
+      (tester) async {
+    await pump(
+      tester,
+      CompanionShellView(baseMap: false, onChangeProfile: () {}),
+    );
+    // La primera es la de las pestañas; la lista desplegable del Historial
+    // usa otra por dentro.
+    IndexedStack stack() => tester.widget(find.byType(IndexedStack).first);
+    await tester.tap(
+      find.descendant(
+          of: find.byType(PillNav), matching: find.text('Historial')),
+    );
+    await tester.pump();
+    expect(stack().index, 1);
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(stack().index, 0);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('¿Salir de EyeSight AI?'), findsOneWidget);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CompanionShellView), findsOneWidget);
   });
 
   group('Mapa y lista (HU10)', () {
