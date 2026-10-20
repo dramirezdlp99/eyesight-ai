@@ -47,6 +47,8 @@ class _CompanionShellViewState extends State<CompanionShellView> {
     }
   }
 
+  void _toMap() => _select(CompanionTab.map);
+
   /// «Atrás» vuelve al Mapa; desde el Mapa pregunta antes de salir.
   Future<void> _back() async {
     if (_tab != CompanionTab.map) {
@@ -83,10 +85,16 @@ class _CompanionShellViewState extends State<CompanionShellView> {
       body: IndexedStack(
         index: _tab.index,
         children: [
-          ZonesView(baseMap: widget.baseMap),
-          const HistoryView(),
-          SettingsView(onChangeProfile: widget.onChangeProfile),
-          const PrivacyView(),
+          ZonesView(
+            baseMap: widget.baseMap,
+            onChangeProfile: widget.onChangeProfile,
+          ),
+          HistoryView(onBack: _toMap),
+          SettingsView(
+            onChangeProfile: widget.onChangeProfile,
+            onBack: _toMap,
+          ),
+          PrivacyView(onBack: _toMap),
         ],
       ),
       bottomNavigationBar: PillNav(current: _tab, onSelect: _select),
