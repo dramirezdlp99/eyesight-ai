@@ -14,10 +14,14 @@ class SettingsView extends GetView<SettingsController> {
     super.key,
     required this.onChangeProfile,
     this.onOpenTestMode,
+    this.onBack,
   });
 
   final VoidCallback onChangeProfile;
   final VoidCallback? onOpenTestMode;
+
+  /// Botón «Volver» de la cabecera (vuelve al Mapa).
+  final VoidCallback? onBack;
 
   Future<void> _reset(BuildContext context) async {
     final ok = await confirmAction(
@@ -43,7 +47,8 @@ class SettingsView extends GetView<SettingsController> {
       return ListView(
         padding: EdgeInsets.zero,
         children: [
-          const CompanionHeader(
+          CompanionHeader(
+            onBack: onBack,
             title: 'Ajustes',
             color: AppColors.ink,
             stepColor: AppColors.inkSoft,
