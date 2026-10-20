@@ -91,8 +91,17 @@ class InMemoryHistoryRepository implements IHistoryRepository {
     DateTime? from,
     DateTime? to,
     String? label,
-  }) async =>
-      records.toList();
+  }) async {
+    // Mismo comportamiento que HistoryRepository: filtros y orden.
+    final result = [
+      for (final r in records)
+        if ((from == null || !r.timestamp.isBefore(from)) &&
+            (to == null || !r.timestamp.isAfter(to)) &&
+            (label == null || r.label == label))
+          r,
+    ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return result;
+  }
 }
 
 class InMemorySettingsRepository implements ISettingsRepository {
