@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../core/ai/i_obstacle_detector.dart';
 import '../../core/ai/yolo_litert_detector.dart';
+import '../../core/device/file_exporter.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/location_service.dart';
 import '../../core/device/permission_guard.dart';
@@ -45,29 +46,14 @@ abstract final class AppBindings {
       directory: storageDirectory,
     );
 
-    final zones = ZoneRepository(storage.box(EncryptedStorage.zonesBox));
-    final history = HistoryRepository(storage.box(EncryptedStorage.historyBox));
-    final settings =
-        SettingsRepository(storage.box(EncryptedStorage.settingsBox));
-    final audit = AuditRepository(storage.box(EncryptedStorage.auditBox));
     final pin = PinGuard(store, clock: now);
+    _directory = storageDirectory;
+    _clock = now;
 
     Get.put<ISecureStore>(store, permanent: true);
     Get.put<SecureKeyService>(keys, permanent: true);
-    Get.put<EncryptedStorage>(storage, permanent: true);
-    Get.put<IZoneRepository>(zones, permanent: true);
-    Get.put<IHistoryRepository>(history, permanent: true);
-    Get.put<ISettingsRepository>(settings, permanent: true);
-    Get.put<IAuditRepository>(audit, permanent: true);
     Get.put<PinGuard>(pin, permanent: true);
-    Get.put<ZoneService>(
-      ZoneService(zones: zones, audit: audit, clock: now),
-      permanent: true,
-    );
-    Get.put<DataWipeService>(
-      DataWipeService(storage: storage, keys: keys, pin: pin),
-      permanent: true,
-    );
+    await _registerData(storage, keys, pin);
 
     // Servicios del teléfono: se crean al usarse por primera vez, para que
     // las pruebas no necesiten los plugins nativos.
@@ -88,8 +74,55 @@ abstract final class AppBindings {
     );
     Get.put<ThemeController>(ThemeController(), permanent: true);
 
+    Get.lazyPut<IFileExporter>(() => const ShareFileExporter(), fenix: true);
+
     // Retención de 90 días del historial (HU12, CA4).
-    await PurgeOldHistory(history)(now());
+    await PurgeOldHistory(Get.find<IHistoryRepository>())(now());
+  }
+
+  static String? _directory;
+  static DateTime Function() _clock = DateTime.now;
+
+  /// Abre de nuevo el almacenamiento con una clave nueva después del
+  /// borrado total (HU14, CA2) y reemplaza los repositorios registrados.
+  static Future<void> reopenStorage() async {
+    final keys = Get.find<SecureKeyService>();
+    final storage = await EncryptedStorage.open(
+      key: await keys.getOrCreateKey(),
+      directory: _directory,
+    );
+    await _registerData(storage, keys, Get.find<PinGuard>());
+  }
+
+  /// Registra las colecciones cifradas y los servicios que dependen de ellas.
+  static Future<void> _registerData(
+    EncryptedStorage storage,
+    SecureKeyService keys,
+    PinGuard pin,
+  ) async {
+    final zones = ZoneRepository(storage.box(EncryptedStorage.zonesBox));
+    final history = HistoryRepository(storage.box(EncryptedStorage.historyBox));
+    final settings =
+        SettingsRepository(storage.box(EncryptedStorage.settingsBox));
+    final audit = AuditRepository(storage.box(EncryptedStorage.auditBox));
+    await _replace<EncryptedStorage>(storage);
+    await _replace<IZoneRepository>(zones);
+    await _replace<IHistoryRepository>(history);
+    await _replace<ISettingsRepository>(settings);
+    await _replace<IAuditRepository>(audit);
+    await _replace<ZoneService>(
+      ZoneService(zones: zones, audit: audit, clock: _clock),
+    );
+    await _replace<DataWipeService>(
+      DataWipeService(storage: storage, keys: keys, pin: pin),
+    );
+  }
+
+  static Future<void> _replace<T>(T instance) async {
+    if (Get.isRegistered<T>()) {
+      await Get.delete<T>(force: true);
+    }
+    Get.put<T>(instance, permanent: true);
   }
 
   /// Cierra el almacenamiento y elimina todas las dependencias registradas.
