@@ -5,5 +5,6 @@ abstract final class AppRoutes {
   static const String pin = '/pin';
   static const String scanner = '/escaner';
   static const String companion = '/acompanante';
-  static const String detectionTest = '/prueba-deteccion';
+  static const String editZone = '/acompanante/zona';
+  static const String testMode = '/acompanante/pruebas';
 }
