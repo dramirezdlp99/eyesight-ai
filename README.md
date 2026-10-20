@@ -66,9 +66,9 @@ manipulación). Hoy se incluye YOLOv8n **preentrenado en COCO** (modelo base de 
 modelo **ajustado e INT8** se produce con `ml/` y se instala con `ml/scripts/export.py`.
 
 La inferencia corre con LiteRT en un hilo aislado que hace la conversión YUV, la inferencia y la
-NMS; la interfaz solo recibe las cajas. `Probar detección`, en la pantalla del
-acompañante, muestra la cámara con las cajas, los cuadros por segundo y los tiempos de
-inferencia y de captura a resultado (RNF01 a RNF03).
+NMS; la interfaz solo recibe las cajas. El **modo de pruebas** (Ajustes → Modo de pruebas)
+muestra en vivo los cuadros por segundo y los tiempos de inferencia y de captura a alerta
+(RNF01 a RNF03), y exporta cada cuadro a CSV (HU15).
 
 El modelo propio se evalúa con imágenes de Pasto. `ml/GUIA-GRABACION.md` explica cómo grabarlas y
 `ml/scripts/extract_frames.py` extrae los cuadros nítidos de los videos.
@@ -129,6 +129,21 @@ Las alertas siguen el formato «Poste, cerca, al frente» y vibran con 3, 2 o 1 
 cercanía; las zonas registradas avisan con un pulso largo y «Atención: hueco a 15 metros».
 Los obstáculos fijos peligrosos que se detectan cerca, con GPS de 20 m o mejor, se registran
 como zonas automáticas, y cada alerta queda en el historial cifrado.
+
+## Acompañante (HU10 a HU15)
+
+Después del PIN, el acompañante tiene cuatro pestañas:
+
+| Pestaña | Qué hace | Historia |
+|---|---|---|
+| Mapa | Zonas en un mapa de OpenStreetMap y en una lista filtrable por origen; tocar una zona la edita (tipo, radio, nota) o la elimina | HU10, HU11 |
+| Historial | Alertas por fecha (hoy, 7 días, 30 días, todo) y tipo, con la gráfica de la semana; se borran solas a los 90 días | HU12 |
+| Ajustes | Velocidad y volumen de la voz con frase de ejemplo, vibración, zonas automáticas, radio, confianza mínima, cámara y modo de pruebas | HU13, HU15 |
+| Privacidad | Datos guardados, permisos, cambio de PIN y borrado total escribiendo «ELIMINAR» | HU14 |
+
+Sin internet todo funciona; solo el plano del mapa no carga (HU10, CA2). El modo de pruebas
+registra cada cuadro con el caso de prueba (CP-02 a CP-07) y la etiqueta real elegida por el
+investigador, y exporta el CSV sin coordenadas salvo que se activen (HU15).
 
 ## Pruebas
 
