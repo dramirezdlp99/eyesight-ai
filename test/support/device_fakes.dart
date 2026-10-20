@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:eyesight_ai/core/device/file_exporter.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
@@ -114,5 +115,20 @@ class FakePermissions implements IPermissionGuard {
       granted.add(permission);
     }
     return grantOnRequest;
+  }
+}
+
+/// Exportador falso: guarda el archivo en memoria.
+class FakeFileExporter implements IFileExporter {
+  final Map<String, String> files = {};
+  bool fail = false;
+
+  @override
+  Future<String> export(String fileName, String contents) async {
+    if (fail) {
+      throw StateError('sin espacio');
+    }
+    files[fileName] = contents;
+    return '/tmp/$fileName';
   }
 }
