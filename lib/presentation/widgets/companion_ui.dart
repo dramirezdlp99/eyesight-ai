@@ -19,6 +19,7 @@ class CompanionHeader extends StatelessWidget {
     this.trailing,
     this.bottom,
     this.onBack,
+    this.backLabel = 'Volver',
   });
 
   final String title;
@@ -31,6 +32,9 @@ class CompanionHeader extends StatelessWidget {
 
   /// Muestra el botón «Volver» arriba a la izquierda.
   final VoidCallback? onBack;
+
+  /// Texto del botón de regreso.
+  final String backLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +78,7 @@ class CompanionHeader extends StatelessWidget {
                             ),
                           ),
                           icon: const Icon(Icons.arrow_back),
-                          label: const Text('Volver'),
+                          label: Text(backLabel),
                           onPressed: back,
                         ),
                       ),
@@ -167,10 +171,14 @@ class StatTile extends StatelessWidget {
               child: Text(value, style: AppText.display(28, color: fg)),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: text.bodyMedium?.copyWith(color: fg),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: text.bodyMedium?.copyWith(color: fg),
+              ),
             ),
           ],
         ),
