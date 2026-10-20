@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:eyesight_ai/core/ai/i_obstacle_detector.dart';
+import 'package:eyesight_ai/core/device/file_exporter.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
@@ -92,5 +93,24 @@ void main() {
     await AppBindings.init(
         secureStore: store, storageDirectory: dir.path, clock: () => t0);
     expect(await Get.find<IHistoryRepository>().count(), 1);
+  });
+
+  test(
+      'después del borrado total abre de nuevo un almacenamiento vacío '
+      '(HU14, CA2)', () async {
+    await AppBindings.init(
+        secureStore: store, storageDirectory: dir.path, clock: () => t0);
+    await Get.find<IZoneRepository>().save(zone());
+    final oldKey = store.values.values.single;
+
+    await Get.find<DataWipeService>().wipeAll();
+    await AppBindings.reopenStorage();
+
+    expect(Get.find<EncryptedStorage>().isOpen, isTrue);
+    expect(await Get.find<IZoneRepository>().count(), 0);
+    expect(store.values.values.single, isNot(oldKey)); // clave nueva
+    await Get.find<IZoneRepository>().save(zone(id: 'nueva'));
+    expect(await Get.find<IZoneRepository>().count(), 1);
+    expect(Get.isRegistered<IFileExporter>(), isTrue);
   });
 }
