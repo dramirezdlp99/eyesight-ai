@@ -16,14 +16,17 @@
 
     <!-- allowBackup y fullBackupContent en false: las zonas y la clave no se
          copian a la nube ni a otro teléfono (STRIDE: divulgación).
-         usesCleartextTraffic en false: solo HTTPS (MASVS-NETWORK). -->
+         usesCleartextTraffic en false: solo HTTPS (MASVS-NETWORK).
+         enableOnBackInvokedCallback en false: el botón «atrás» del teléfono
+         llega siempre a la app, que pregunta antes de salir (accesibilidad). -->
     <application
         android:label="EyeSight AI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"
