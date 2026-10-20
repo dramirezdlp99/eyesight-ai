@@ -122,11 +122,7 @@ class _EditZoneViewState extends State<EditZoneView> {
                 automatic ? AppColors.carminDeep : AppColors.esmeraldaDeep,
             subtitle: '${automatic ? 'Automática' : 'Manual'} · ${zone.count} '
                 '${zone.count == 1 ? 'registro' : 'registros'}',
-            trailing: IconButton(
-              tooltip: 'Volver',
-              icon: const Icon(Icons.close, color: AppColors.paper),
-              onPressed: _done,
-            ),
+            onBack: _done,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
