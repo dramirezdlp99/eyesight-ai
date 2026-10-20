@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/history_controller.dart';
@@ -46,8 +47,38 @@ class _CompanionShellViewState extends State<CompanionShellView> {
     }
   }
 
+  /// «Atrás» vuelve al Mapa; desde el Mapa pregunta antes de salir.
+  Future<void> _back() async {
+    if (_tab != CompanionTab.map) {
+      _select(CompanionTab.map);
+      return;
+    }
+    final exit = await confirmAction(
+      context,
+      title: '¿Salir de EyeSight AI?',
+      body: 'Las zonas, el historial y los ajustes quedan guardados.',
+      confirmLabel: 'Salir',
+      danger: false,
+    );
+    if (exit) {
+      await SystemNavigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _back();
+        }
+      },
+      child: _scaffold(),
+    );
+  }
+
+  Widget _scaffold() {
     return Scaffold(
       body: IndexedStack(
         index: _tab.index,
