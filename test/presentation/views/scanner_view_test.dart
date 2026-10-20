@@ -191,7 +191,7 @@ void main() {
       await pumpScanner(tester, lowVision: false);
       expect(find.text('Sin alertas por ahora'), findsOneWidget);
       expect(find.text('Doble toque'), findsOneWidget);
-      expect(find.text('Mantener 2 s'), findsOneWidget);
+      expect(find.text('Mantener 2\u00A0s'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
