@@ -18,6 +18,7 @@ class CompanionHeader extends StatelessWidget {
     this.stepColor = AppColors.esmeraldaDeep,
     this.trailing,
     this.bottom,
+    this.onBack,
   });
 
   final String title;
@@ -28,8 +29,12 @@ class CompanionHeader extends StatelessWidget {
   final Widget? trailing;
   final Widget? bottom;
 
+  /// Muestra el botón «Volver» arriba a la izquierda.
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
+    final back = onBack;
     final text = Theme.of(context).textTheme;
     final eyebrowText = eyebrow;
     final subtitleText = subtitle;
@@ -58,6 +63,21 @@ class CompanionHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (back != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.paper,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                            ),
+                          ),
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text('Volver'),
+                          onPressed: back,
+                        ),
+                      ),
                     if (eyebrowText != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
@@ -284,6 +304,9 @@ class _PillItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(26),
           ),
           child: Column(
+            // Sin esto la columna ocupa toda la altura disponible y la
+            // píldora tapa la pantalla.
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(active ? tab.activeIcon : tab.icon, color: fg, size: 22),
