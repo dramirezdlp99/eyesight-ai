@@ -36,6 +36,23 @@ class ScannerView extends GetView<ScannerController> {
   @override
   Widget build(BuildContext context) {
     final lowVision = _lowVision;
+    // «Atrás» no cierra la app mientras escanea: pregunta antes de terminar.
+    return Obx(() {
+      final active = controller.state.value == ScanState.scanning ||
+          controller.state.value == ScanState.starting;
+      return PopScope(
+        canPop: !active,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) {
+            controller.back();
+          }
+        },
+        child: _scaffold(lowVision),
+      );
+    });
+  }
+
+  Widget _scaffold(bool lowVision) {
     return Scaffold(
       body: SafeArea(
         child: Obx(() {
