@@ -20,47 +20,56 @@ class PinView extends GetView<PinController> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Scaffold(
-      body: Obx(
-        () => SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Header(
-                title: controller.title,
-                count: controller.entered.value.length,
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    controller.error.value ?? ' ',
-                    textAlign: TextAlign.center,
-                    style: text.bodyLarge?.copyWith(
-                      color: scheme.error,
-                      fontWeight: FontWeight.w700,
+    // «Atrás» vuelve a la selección de perfil en lugar de cerrar la app.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          controller.changeProfile();
+        }
+      },
+      child: Scaffold(
+        body: Obx(
+          () => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Header(
+                  title: controller.title,
+                  count: controller.entered.value.length,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      controller.error.value ?? ' ',
+                      textAlign: TextAlign.center,
+                      style: text.bodyLarge?.copyWith(
+                        color: scheme.error,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: _Keypad(
-                  onDigit: controller.addDigit,
-                  onBackspace: controller.backspace,
-                  onSubmit: controller.busy.value ? null : controller.submit,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: _Keypad(
+                    onDigit: controller.addDigit,
+                    onBackspace: controller.backspace,
+                    onSubmit: controller.busy.value ? null : controller.submit,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: TextButton.icon(
-                  icon: const Icon(Icons.swap_horiz),
-                  onPressed: controller.changeProfile,
-                  label: const Text('Cambiar de perfil'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.swap_horiz),
+                    onPressed: controller.changeProfile,
+                    label: const Text('Cambiar de perfil'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
