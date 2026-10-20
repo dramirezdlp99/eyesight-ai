@@ -641,6 +641,20 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     await _ask(ScannerDialog.confirmStop, askStopMessage);
   }
 
+  /// Botón «atrás» del teléfono. Mientras escanea nunca cierra la app por
+  /// accidente: si hay una pregunta abierta la cancela y, si no, pregunta si
+  /// desea terminar (HU09, CA3).
+  Future<void> back() async {
+    switch (dialog.value) {
+      case ScannerDialog.zoneType:
+        await cancelZone();
+      case ScannerDialog.confirmStop:
+        await confirmStop(false);
+      case ScannerDialog.none:
+        await requestStop();
+    }
+  }
+
   Future<void> confirmStop(bool confirmed) async {
     dialog.value = ScannerDialog.none;
     if (confirmed) {
