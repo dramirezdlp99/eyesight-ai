@@ -11,7 +11,10 @@ import '../../widgets/companion_ui.dart';
 
 /// Historial de alertas con filtros de fecha y tipo (HU12, RF17).
 class HistoryView extends GetView<HistoryController> {
-  const HistoryView({super.key});
+  const HistoryView({super.key, this.onBack});
+
+  /// Botón «Volver» de la cabecera (vuelve al Mapa).
+  final VoidCallback? onBack;
 
   static const List<String> weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
   static const List<String> weekdayNames = [
@@ -116,6 +119,7 @@ class HistoryView extends GetView<HistoryController> {
           padding: EdgeInsets.zero,
           children: [
             CompanionHeader(
+              onBack: onBack,
               title: 'Historial',
               color: AppColors.cobalt,
               stepColor: AppColors.cobaltDeep,
@@ -316,10 +320,15 @@ class _RecordTile extends StatelessWidget {
           child: Row(
             children: [
               SizedBox(
-                width: 54,
-                child: Text(
-                  HistoryView.time(record.timestamp),
-                  style: text.titleMedium,
+                width: 64,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    HistoryView.time(record.timestamp),
+                    maxLines: 1,
+                    style: text.titleMedium,
+                  ),
                 ),
               ),
               Expanded(
