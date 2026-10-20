@@ -127,6 +127,19 @@ void main() {
       expect(profileChanges, 1);
     });
 
+    testWidgets('«atrás» no cierra la app: pregunta si desea terminar',
+        (tester) async {
+      await pumpScanner(tester, lowVision: true);
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(find.text('Sí, terminar'), findsOneWidget);
+      expect(controller.state.value, ScanState.scanning);
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(find.text('Sí, terminar'), findsNothing);
+      expect(speech.spoken.last, ScannerController.continueMessage);
+    });
+
     testWidgets('«Repetir» sin alertas lo informa por voz', (tester) async {
       await pumpScanner(tester, lowVision: true);
       await tester.tap(button('Repetir'));
