@@ -175,7 +175,7 @@ class _BlindBody extends StatelessWidget {
                 Positioned(
                   left: 12,
                   right: 12,
-                  bottom: 12,
+                  top: 12,
                   child: Obx(() => _SavedZoneToast(
                         zone: controller.savedZone.value,
                       )),
@@ -248,8 +248,9 @@ class _CameraPanel extends StatelessWidget {
               children: [
                 _Preview(controller: controller, detections: detections),
                 if (scanning) const ScanSweep(color: AppColors.paper),
+                // Abajo, para no tapar las etiquetas de lo que está al frente.
                 Positioned(
-                  top: 12,
+                  bottom: 12,
                   left: 12,
                   right: 12,
                   child: Wrap(
@@ -692,8 +693,8 @@ class _GestureHelp extends StatelessWidget {
 
   static const List<(IconData, String, String)> gestures = [
     (Icons.touch_app, 'Doble toque', 'repetir'),
-    (Icons.swipe, 'Deslizar', 'silenciar 10 s'),
-    (Icons.pan_tool_alt, 'Mantener 2 s', 'marcar zona'),
+    (Icons.swipe, 'Deslizar', 'silenciar 10\u00A0s'),
+    (Icons.pan_tool_alt, 'Mantener 2\u00A0s', 'marcar zona'),
   ];
 
   @override
@@ -1072,25 +1073,39 @@ class _BigButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconData = icon;
-    final child = Text(label, textAlign: TextAlign.center);
+    // Una sola línea que se ajusta al ancho: la palabra nunca se parte.
+    final text = FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(label, maxLines: 1, textAlign: TextAlign.center),
+    );
+    final Widget child = iconData == null
+        ? text
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(iconData, size: 30),
+              const SizedBox(height: 4),
+              text
+            ],
+          );
+    const padding = EdgeInsets.symmetric(horizontal: 10, vertical: 12);
     final Widget button;
     if (outlined) {
-      button = OutlinedButton(onPressed: onPressed, child: child);
+      button = OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(padding: padding),
+        child: child,
+      );
     } else {
-      final style = danger
-          ? FilledButton.styleFrom(
-              backgroundColor: AppColors.carmin,
-              foregroundColor: AppColors.paper,
-            )
-          : null;
-      button = iconData == null
-          ? FilledButton(onPressed: onPressed, style: style, child: child)
-          : FilledButton.icon(
-              onPressed: onPressed,
-              style: style,
-              icon: Icon(iconData),
-              label: child,
-            );
+      button = FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          padding: padding,
+          backgroundColor: danger ? AppColors.carmin : null,
+          foregroundColor: danger ? AppColors.paper : null,
+        ),
+        child: child,
+      );
     }
     return Expanded(
       child: Padding(padding: const EdgeInsets.all(5), child: button),
