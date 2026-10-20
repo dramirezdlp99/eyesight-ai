@@ -203,6 +203,8 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
 
   AppSettings _config = const AppSettings();
   IVideoSource? _source;
+  // Se cancela en stopScan(), a través de una variable local.
+  // ignore: cancel_subscriptions
   StreamSubscription<CameraFrame>? _frames;
   Timer? _pollTimer;
   GeoPosition? _lastPosition;
