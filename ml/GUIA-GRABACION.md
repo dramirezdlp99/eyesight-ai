@@ -1,71 +1,107 @@
-# Guía de grabación en Pasto: conjunto de prueba del modelo
+# Guía de grabación en Pasto (versión definitiva)
 
-Esta guía explica cómo grabar los videos de Pasto que sirven para **evaluar** el modelo ajustado
-(objetivo específico 3, caso de prueba CP-01). El modelo se **entrena** con conjuntos públicos de
-Roboflow. Sus videos solo se usan para medir qué tan bien funciona en las calles de Pasto, y por
-eso no tienen que ser muchos.
+Los videos de Pasto cumplen dos funciones:
 
-## 1. Qué necesita
+1. **Entrenar.** El modelo ya aprende de miles de fotos públicas de Roboflow. Con las imágenes de
+   Pasto, además, se acostumbra a cómo se ven los andenes, postes, gradas y huecos de la ciudad:
+   su luz, sus colores y sus materiales.
+2. **Evaluar.** Se mide qué tan bien funciona en Pasto con objetos que el modelo **nunca vio**
+   (objetivo específico 3, caso de prueba CP-01). Esos son los resultados del capítulo 4 del
+   informe.
 
-- El teléfono (vivo Y22s) con al menos 5 GB libres.
-- Una cinta para colgar el teléfono en el pecho, o un arnés de pecho para celular, que cuesta unos
-  $25.000 a $40.000. Si no tiene arnés, sostenga el teléfono con las dos manos contra el pecho.
-- De 2 a 3 salidas de unos 40 minutos, en días y horas distintas.
-- Opcional: otra persona que camine a su lado para cuidar su seguridad mientras graba.
+## 1. La regla más importante: separar por sector
 
-## 2. Cómo grabar
+Evaluar un modelo con imágenes que ya vio al entrenar es como darle a un estudiante las mismas
+preguntas del examen para que estudie: saca 5,0 sin haber aprendido. Esto se llama **fuga de
+datos**, e infla los resultados.
 
-1. **Altura del pecho y en vertical.** Así se usará la app: con la cámara a unos 1,2 a 1,4 m del
-   suelo, apuntando al frente y un poco hacia abajo, de modo que el suelo ocupe la mitad inferior
-   de la imagen.
-2. **Resolución 1080p a 30 cuadros por segundo.** No use 4K, porque pesa mucho y no aporta nada.
-   Desactive el estabilizador "súper" si hace zoom.
-3. **Camine despacio**, a paso normal de una persona con bastón (unos 3 a 4 km/h). Al acercarse a
-   un obstáculo, deténgase 2 segundos a unos 5 m, luego a 3 m y luego a 1 m. Así quedan imágenes
-   de las tres cercanías: lejos, a media distancia y cerca.
-4. **Videos cortos**, de 1 a 3 minutos cada uno, con un nombre por lugar, por ejemplo
-   `centro-carrera25.mp4` o `parque-narino.mp4`. Los videos cortos son más fáciles de revisar y de
-   repartir entre entrenamiento y prueba.
-5. **Varíe la luz.** Grabe en la mañana, al mediodía, en la tarde nublada y, si es posible, con la
-   calle mojada. En Pasto llueve mucho, y el modelo debe funcionar así.
+Dos cuadros seguidos de un mismo video son casi idénticos. Por eso **no** se reparten cuadros
+sueltos entre entrenamiento y prueba. Se reparten **sectores completos**:
 
-## 3. Qué grabar (las 13 clases)
-
-Lo más importante son las 6 clases nuevas, porque el modelo base de COCO no las conoce:
-
-| Clase | En español | Ejemplos en Pasto | Meta de imágenes de prueba |
+| Conjunto | Sectores | Parte del total | Para qué |
 |---|---|---|---|
-| `pole` | Poste | Postes de luz y de teléfono, señales verticales | 40 a 50 |
-| `bollard` | Bolardo | Bolardos del centro y de la Plaza de Nariño | 30 a 40 |
-| `traffic_cone` | Cono | Conos de obra y de tránsito | 30 a 40 |
-| `step` | Escalón | Bordillos, escalones de andén, rampas con desnivel | 40 a 50 |
-| `pothole` | Hueco | Huecos en andenes y calles, sumideros sin tapa | 40 a 50 |
-| `construction` | Obra | Vallas, cintas, zanjas, materiales en el andén | 30 a 40 |
+| Entrenamiento | 2 o 3 sectores, por ejemplo su barrio y dos barrios cercanos | 70 a 75 % | El modelo aprende de ellos |
+| Prueba | 1 sector distinto, por ejemplo los alrededores de la universidad o el centro | 25 a 30 % | Se mide el modelo; nunca se usa para entrenar |
 
-Las clases comunes (persona, bicicleta, automóvil, motocicleta, bus, camión y perro) aparecen
-solas en cualquier calle. Basta con unas 20 a 30 imágenes de cada una.
+Elija para la prueba un sector donde haya **de todo**: postes, gradas, huecos, bolardos o conos,
+y alguna obra. Así hay resultados para todas las clases.
 
-Lugares recomendados:
+## 2. Qué necesita
 
-- El centro: carreras 24 a 27 entre calles 16 y 20.
-- Los alrededores de la Plaza de Nariño.
-- La avenida Panamericana, con andenes anchos y obras.
-- Un barrio con andenes en mal estado.
-- Los alrededores de la Universidad Cooperativa.
+- El teléfono con al menos 8 GB libres.
+- Una cinta o arnés de pecho para celular (unos $25.000 a $40.000). Si no tiene, sostenga el
+  teléfono con las dos manos contra el pecho.
+- De 3 a 5 salidas de unos 30 a 40 minutos, en días y horas distintas.
+- Opcional, pero recomendado: otra persona que camine a su lado.
 
-## 4. Seguridad y privacidad
+## 3. Cómo grabar
 
-- **Su seguridad primero.** No grabe cruzando la calle ni de noche en lugares solos. Si va con
-  el teléfono en la mano, guárdelo al cruzar.
-- **No grabe a nadie de cerca a propósito.** Si una persona sale de cerca en un cuadro, el script
-  difumina las caras con `--blur-faces`. Revise igual las imágenes y borre las que muestren
-  placas de vehículos legibles o caras sin difuminar. Así se cumple la Ley 1581 de 2012 de
-  protección de datos personales.
-- No suba los videos originales a ningún sitio público. Suba solo los cuadros ya revisados.
+1. **Altura del pecho y en vertical**, como se usará la app: a unos 1,2 a 1,4 m del suelo,
+   apuntando al frente y un poco hacia abajo, de modo que el suelo ocupe la mitad inferior de la
+   imagen.
+2. **1080p a 30 cuadros por segundo.** No use 4K.
+3. **Camine despacio**, unos 3 a 4 km/h. Al acercarse a un obstáculo, deténgase 2 segundos a
+   unos 5 m, luego a 3 m y luego a 1 m. Así quedan imágenes lejos, a media distancia y cerca.
+4. **Videos de 1 a 3 minutos**, cada uno nombrado con su sector y un número:
+   `barrio-1.mp4`, `barrio-2.mp4`, `universidad-1.mp4`.
+5. **En total, 30 a 40 minutos de video**, repartidos según la tabla del punto 1.
 
-## 5. Del video a las imágenes
+### Horarios y luz
 
-En su computador, una sola vez:
+| Momento | Proporción aproximada | Por qué |
+|---|---|---|
+| Mañana | 1 de cada 3 videos | Luz suave y sombras largas |
+| Mediodía con sol | 1 de cada 3 videos | Sombras duras que confunden al modelo |
+| Tarde nublada o con piso mojado | 1 de cada 4 videos | Así es Pasto buena parte del año |
+| Noche, en calles iluminadas | 1 de cada 5 videos como máximo | La cámara pierde detalle; en el informe se reporta aparte |
+
+Haga que **el sector de prueba también tenga varias luces**, no solo un horario.
+
+### Variedad: lo que más ayuda
+
+- **Muchos objetos distintos de cada clase**:
+  - gradas de varias casas, de concreto, de baldosa, altas y bajas;
+  - postes de luz, de teléfono y de señales;
+  - huecos grandes, pequeños, secos y con agua.
+- **No grabe el mismo objeto muchas veces.** Diez tomas de la misma grada no enseñan nada nuevo.
+  Pase una vez, con las tres paradas, y siga.
+- **Puede grabar cerca de su casa** y por donde más anda. Lo que importa es la variedad, no la
+  distancia.
+
+## 4. Qué grabar: las 13 clases y cuántas imágenes buscar
+
+Las 6 clases nuevas son las más importantes, porque el modelo base de COCO no las conoce:
+
+| Clase | En español | Ejemplos | Entrenamiento | Prueba |
+|---|---|---|---|---|
+| `pole` | Poste | Postes de luz, de teléfono, señales verticales | 60 a 80 | 30 a 40 |
+| `bollard` | Bolardo | Bolardos de andén y de plazas | 40 a 60 | 20 a 30 |
+| `traffic_cone` | Cono | Conos de obra y de tránsito | 40 a 60 | 20 a 30 |
+| `step` | Escalón | Gradas, bordillos, desniveles del andén | 60 a 80 | 30 a 40 |
+| `pothole` | Hueco | Huecos en andén y calle, sumideros sin tapa | 60 a 80 | 30 a 40 |
+| `construction` | Obra | Vallas, cintas, zanjas, materiales en el andén | 40 a 60 | 20 a 30 |
+
+Las cantidades son de **imágenes donde aparece la clase**. Las clases comunes (persona,
+bicicleta, automóvil, motocicleta, bus, camión y perro) salen solas en cualquier calle; con 20 a
+40 imágenes de cada una basta.
+
+En total quedarán unas **600 a 800 imágenes** revisadas: unas 450 a 550 para entrenar y unas
+150 a 250 para la prueba.
+
+## 5. Seguridad y privacidad
+
+- **Su seguridad primero.** No grabe cruzando la calle ni en lugares solos de noche.
+- **No grabe a nadie de cerca a propósito.** El script difumina las caras (`--blur-faces`).
+  Revise igual las imágenes y borre las que tengan caras sin difuminar o placas legibles. Así se
+  cumple la Ley 1581 de 2012 de protección de datos personales.
+- En el plan gratuito de Roboflow los proyectos son **públicos**. Por eso solo se suben imágenes
+  ya revisadas, nunca los videos.
+- El `.gitignore` excluye `ml/videos/`, `ml/datasets/` y `ml/.venv/`: nada de esto llega a
+  GitHub.
+
+## 6. Del video a las imágenes
+
+Una sola vez, en PowerShell:
 
 ```powershell
 cd C:\dev\eyesight-ai\ml
@@ -74,63 +110,82 @@ python -m venv .venv
 pip install opencv-python-headless numpy
 ```
 
-Copie los videos del teléfono a `C:\dev\eyesight-ai\ml\videos\`. Esa carpeta no se sube a GitHub;
-vea el paso 7. Luego, por cada lugar:
+Copie los videos del teléfono a `C:\dev\eyesight-ai\ml\videos\`. Luego extraiga **cada sector en
+su propia carpeta**:
 
 ```powershell
-python scripts\extract_frames.py --videos videos\centro-*.mp4 --place centro --output datasets\pasto\centro --blur-faces
+python scripts\extract_frames.py --videos videos\barrio-*.mp4 --place barrio --output datasets\pasto\entrenamiento\barrio --blur-faces
+python scripts\extract_frames.py --videos videos\otro-*.mp4 --place otro --output datasets\pasto\entrenamiento\otro --blur-faces
+python scripts\extract_frames.py --videos videos\universidad-*.mp4 --place universidad --output datasets\pasto\prueba --blur-faces
 ```
 
-- El script guarda **1 cuadro por segundo** y descarta los movidos. Un minuto de video produce
-  unas 50 imágenes útiles.
-- Si quedan muchas imágenes movidas, suba el umbral con `--min-sharpness 100`. Si descarta
-  demasiadas, bájelo a `40`.
+- Guarda **1 cuadro por segundo** y descarta los movidos.
+- Si quedan muchas imágenes movidas, use `--min-sharpness 100`. Si descarta demasiadas, use `40`.
 - Para tener más cuadros cerca de los obstáculos, use `--every 0.5`.
 
-Después **revise las imágenes** y borre las que no tengan ningún obstáculo útil o las repetidas.
-Con 300 a 400 imágenes en total es suficiente.
+Después **revise las imágenes**. Borre las que no tengan ningún obstáculo, las casi repetidas y
+las que tengan datos personales.
 
-## 6. Etiquetar en Roboflow (gratis)
+## 7. Etiquetar en Roboflow: dos proyectos
 
-1. Cree una cuenta en `https://roboflow.com` y un proyecto **Object Detection** llamado
-   `eyesight-pasto`.
-2. Suba las imágenes de `datasets\pasto\`.
-3. Etiquete con **cajas** usando exactamente estos nombres en inglés: `person`, `bicycle`, `car`,
-   `motorcycle`, `bus`, `truck`, `dog`, `pole`, `bollard`, `traffic_cone`, `step`, `pothole`,
-   `construction`.
-   - La caja debe ajustarse al objeto, sin dejar mucho borde.
+Cree una cuenta en `https://roboflow.com` y **dos** proyectos de tipo **Object Detection**:
+
+| Proyecto | Qué subir | Partición al generar la versión |
+|---|---|---|
+| `eyesight-pasto-entrenamiento` | `datasets\pasto\entrenamiento\` | 85 % Train, 15 % Valid, 0 % Test |
+| `eyesight-pasto-prueba` | `datasets\pasto\prueba\` | 100 % Test |
+
+En los dos proyectos:
+
+1. Etiquete con **cajas** usando exactamente estos nombres en inglés:
+
+   ```
+   person  bicycle  car  motorcycle  bus  truck  dog
+   pole  bollard  traffic_cone  step  pothole  construction
+   ```
+
+   - La caja se ajusta al objeto, sin mucho borde.
    - En un escalón o un hueco, encierre solo el desnivel o el hueco visible.
-   - Si un objeto está tapado más de la mitad, no lo etiquete.
-4. Al generar la versión, **no** aplique aumentos (*augmentations*) a este proyecto, porque es
-   el conjunto de prueba. Póngalo todo en **Test** (100 % test).
-5. Exporte en formato **YOLOv8** y descargue el zip.
+   - Si el objeto está tapado más de la mitad, no lo etiquete.
+   - El *Label Assist* de Roboflow puede proponer cajas para personas y vehículos. Revise cada
+     una antes de aceptarla.
+2. Al generar la versión:
+   - En el proyecto de **prueba**, no active aumentos (*augmentations*).
+   - En el de **entrenamiento**, puede activar «Flip: Horizontal» y «Brightness ±20 %».
+3. Para descargarlos, use **Download Dataset → YOLOv8 → show download code** y anote el
+   `workspace`, el nombre del proyecto y la versión de cada uno.
 
-> El etiquetado asistido de Roboflow (*Label Assist*) puede proponer cajas para las clases
-> comunes. Revise cada una antes de aceptarla.
+Puede repartir el etiquetado en varios días: Roboflow guarda el avance. Calcule unas 4 a 6 horas
+en total.
 
-## 7. Qué subir a GitHub y qué no
+## 8. Entrenar y evaluar en Google Colab
 
-- **No** suba los videos ni las imágenes. Pesan mucho y tienen datos personales.
-- Sí puede subir un archivo de texto con cuántas imágenes y cajas hay por clase. El script
-  `evaluate.py` lo genera para el informe.
-- El `.gitignore` ya excluye `ml/videos/`, `ml/datasets/` y `ml/.venv/`.
+Abra `ml/notebooks/EyeSight_entrenamiento.ipynb` en Colab, con GPU T4.
 
-## 8. Cómo se usa en la evaluación
+1. En el paso 2 del cuaderno:
+   - En `FUENTES` van los conjuntos públicos y `eyesight-pasto-entrenamiento`.
+   - En `PRUEBA_PASTO` va `eyesight-pasto-prueba`. Se descarga aparte, para que nunca se mezcle
+     con el entrenamiento.
+2. Ejecute todas las celdas. El entrenamiento tarda de 1 a 3 horas.
+3. La carpeta `results_pasto` trae los resultados del informe, en dos niveles:
+   - **Nivel objeto**:
+     - la matriz de confusión con la clase «fondo»;
+     - precisión, recall y F1;
+     - AP@0,5, AP@0,5:0,95 e IoU medio.
+   - **Nivel imagen**: exactitud, precisión, recall, F1, especificidad y AUC-ROC por clase, con
+     su curva ROC.
+   - **Umbral de confianza**: la F1 según el umbral y el umbral recomendado para la app.
+   - **Hipótesis**: la comparación entre el modelo base y el ajustado, con bootstrap pareado.
+4. Descargue el zip del final y envíelo para escribir el capítulo 4.
 
-En Google Colab (cuaderno `ml/notebooks/EyeSight_entrenamiento.ipynb`):
-
-1. Se entrena con los conjuntos públicos de Roboflow (pasos 1 y 2 del cuaderno).
-2. Se sube el zip de `eyesight-pasto` como conjunto de prueba.
-3. `evaluate.py` compara el modelo base (COCO) con el modelo ajustado en **las mismas imágenes de
-   Pasto**. Calcula precisión, recall, F1 y mAP@0,5 por clase, y la prueba de hipótesis con
-   bootstrap pareado (numeral 2.3).
-4. Esos resultados reales reemplazan los valores esperados del capítulo 4 del informe.
-
-## 9. Lista rápida para el día de grabación
+## 9. Lista para cada día de grabación
 
 - [ ] Teléfono cargado y con espacio; 1080p a 30 fps
-- [ ] Arnés o cinta de pecho; cámara en vertical, al frente y un poco hacia abajo
-- [ ] Paradas a 5 m, 3 m y 1 m de cada obstáculo nuevo
-- [ ] Al menos dos condiciones de luz (soleado y nublado o mojado)
-- [ ] Videos cortos con el nombre del lugar
-- [ ] Al volver: copiar a `ml\videos\`, extraer, revisar y borrar las imágenes con datos personales
+- [ ] Cámara en el pecho, vertical, al frente y un poco hacia abajo
+- [ ] Paradas a 5 m, 3 m y 1 m de cada obstáculo nuevo, una sola vez por objeto
+- [ ] Anotar el horario y la luz de cada video
+- [ ] Nombre de cada video con su sector: `sector-número.mp4`
+- [ ] Al volver:
+  - copiar los videos a `ml\videos\`;
+  - extraer cada sector en su carpeta;
+  - revisar y borrar las imágenes con datos personales.
