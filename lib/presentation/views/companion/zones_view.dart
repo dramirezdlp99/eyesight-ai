@@ -16,7 +16,16 @@ import '../../widgets/companion_ui.dart';
 /// Las zonas y la lista funcionan sin internet; solo el mapa base
 /// (OpenStreetMap) necesita conexión (HU10, CA2).
 class ZonesView extends GetView<ZonesController> {
-  const ZonesView({super.key, this.baseMap = true, this.onOpenZone});
+  const ZonesView({
+    super.key,
+    this.baseMap = true,
+    this.onOpenZone,
+    this.onChangeProfile,
+  });
+
+  /// Botón «Cambiar de perfil» de la cabecera: vuelve a la selección de
+  /// perfil sin cerrar la app.
+  final VoidCallback? onChangeProfile;
 
   /// `false` en las pruebas: no se descargan teselas.
   final bool baseMap;
@@ -53,6 +62,8 @@ class ZonesView extends GetView<ZonesController> {
           padding: EdgeInsets.zero,
           children: [
             CompanionHeader(
+              onBack: onChangeProfile,
+              backLabel: 'Cambiar de perfil',
               eyebrow: 'Hola, acompañante',
               title: 'Zonas de riesgo',
               bottom: Row(
