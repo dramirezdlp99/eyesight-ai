@@ -51,11 +51,7 @@ class TestModeView extends GetView<TestModeController> {
               title: 'Modo de pruebas',
               color: AppColors.cobalt,
               stepColor: AppColors.cobaltDeep,
-              trailing: IconButton(
-                tooltip: 'Salir del modo de pruebas',
-                icon: const Icon(Icons.close, color: AppColors.paper),
-                onPressed: () => Get.back<void>(),
-              ),
+              onBack: () => Get.back<void>(),
               bottom: Semantics(
                 liveRegion: true,
                 child: Text(
