@@ -6,6 +6,7 @@ import '../../domain/entities/detection.dart';
 import '../../domain/entities/proximity.dart';
 import '../../domain/usecases/alert_policy.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 /// Dibuja la franja de trayectoria y las cajas detectadas sobre la imagen
 /// de la cámara (wireframe de la HU03).
@@ -92,6 +93,8 @@ class DetectionPainter extends CustomPainter {
           text: '${ObstacleCatalog.spanishName(d.label)} '
               '${d.confidence.toStringAsFixed(2).replaceAll('.', ',')}',
           style: TextStyle(
+            // La tipografía de la app; sin ella el teléfono usa la suya.
+            fontFamily: AppFonts.body,
             color: AppColors.onProximity(d.proximity),
             fontSize: 14,
             fontWeight: FontWeight.w800,
