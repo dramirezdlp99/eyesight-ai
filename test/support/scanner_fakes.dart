@@ -38,8 +38,15 @@ class FakeDetector implements IObstacleDetector {
   /// Programa el resultado del siguiente cuadro.
   void next(List<Detection> detections) => _results.add(detections);
 
+  int threads = 4;
+
   @override
   bool get isReady => loaded;
+
+  @override
+  Future<void> setThreads(int threads) async {
+    this.threads = threads;
+  }
 
   @override
   Future<void> load() async {
