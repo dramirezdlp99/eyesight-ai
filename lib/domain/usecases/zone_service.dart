@@ -118,6 +118,24 @@ class ZoneService {
     return true;
   }
 
+  /// Importa zonas de una copia (respaldo o de otro teléfono). Omite las
+  /// que ya existen y las que no son válidas. Devuelve cuántas agregó.
+  Future<int> importZones(List<RiskZone> incoming) async {
+    var added = 0;
+    for (final zone in incoming) {
+      if (await _zones.byId(zone.id) != null ||
+          !ObstacleCatalog.createsZone(zone.type) ||
+          InputValidators.radius(zone.radiusM) != null ||
+          InputValidators.note(zone.note) != null) {
+        continue;
+      }
+      await _zones.save(zone);
+      await _log(AuditAction.created, zone);
+      added++;
+    }
+    return added;
+  }
+
   Future<void> _apply(ZoneRegistration result) async {
     switch (result) {
       case ZoneCreated(:final zone):
