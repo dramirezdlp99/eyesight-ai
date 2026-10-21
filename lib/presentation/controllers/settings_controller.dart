@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../core/config/app_constants.dart';
+import '../../core/device/earcons.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/speech_service.dart';
 import '../../core/device/video_source_selector.dart';
@@ -18,15 +19,18 @@ class SettingsController extends GetxController {
     required ISpeechService speech,
     required VideoSourceSelector sources,
     IHaptics? haptics,
+    IEarcons? earcons,
   })  : _settings = settings,
         _speech = speech,
         _sources = sources,
-        _haptics = haptics;
+        _haptics = haptics,
+        _earcons = earcons;
 
   final ISettingsRepository _settings;
   final ISpeechService _speech;
   final VideoSourceSelector _sources;
   final IHaptics? _haptics;
+  final IEarcons? _earcons;
 
   /// Frase de ejemplo al cambiar la voz (HU13, CA1).
   static const String sample =
@@ -35,8 +39,12 @@ class SettingsController extends GetxController {
       'No hay una cámara USB conectada. Se mantiene la cámara del teléfono.';
   static const String resetDone = 'Se restablecieron los valores por defecto.';
   static const String vibrationTest =
-      'Debió sentir 3 pulsos, como un obstáculo cercano. Si no los sintió, '
-      'revise la vibración de alarmas en los ajustes del teléfono.';
+      'Debió sentir 3 pulsos, como un obstáculo cercano. Algunos teléfonos '
+      'no vibran mientras la cámara está encendida; por eso conviene dejar '
+      'los pitidos activados.';
+  static const String beepsTest =
+      'Así suenan los avisos: 3 pitidos cerca, 2 a media distancia, 1 lejos '
+      'y un tono doble para las zonas.';
 
   final Rx<AppSettings> value = const AppSettings().obs;
 
@@ -110,6 +118,29 @@ class SettingsController extends GetxController {
   Future<void> testVibration() async {
     await _haptics?.play(HapticPatterns.near);
   }
+
+  /// Reproduce los pitidos de cerca, media distancia, lejos y zona.
+  Future<void> testBeeps() async {
+    final earcons = _earcons;
+    if (earcons == null) {
+      return;
+    }
+    for (final tones in [
+      Earcons.near,
+      Earcons.medium,
+      Earcons.far,
+      Earcons.zone,
+    ]) {
+      await earcons.play(tones);
+      await Future<void>.delayed(beepsPause);
+    }
+  }
+
+  /// Pausa entre los ejemplos de [testBeeps].
+  static const Duration beepsPause = Duration(milliseconds: 700);
+
+  Future<void> setBeeps(bool enabled) =>
+      _save(value.value.copyWith(beeps: enabled));
 
   Future<void> setVibration(bool enabled) =>
       _save(value.value.copyWith(vibration: enabled));
