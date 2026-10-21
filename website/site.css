@@ -1,0 +1,76 @@
+/* EyeSight AI: estilos comunes de la página web («Barniz de Pasto»). */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("fonts/AtkinsonHyperlegibleNext-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("fonts/AtkinsonHyperlegibleNext-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("fonts/BricolageGrotesque-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-display: swap;
+}
+
+:root {
+  --paper: #ffffff;
+  --mist: #f3f4f8;
+  --line: #e3e4ea;
+  --ink: #17171c;
+  --ink-soft: #4b4b57;
+  --cobalt: #2340d9;
+  --cobalt-deep: #1a2fa6;
+  --carmin: #d11f3a;
+  --oro: #f2b705;
+  --esmeralda: #00875a;
+  color-scheme: light;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.font-display { font-family: "Bricolage Grotesque", "Atkinson Hyperlegible Next", sans-serif; font-weight: 800; letter-spacing: -0.02em; }
+
+.greca {
+  height: 32px;
+  background: url("img/greca.svg") repeat-x left center / auto 32px;
+}
+.greca-tall { height: 48px; background-size: auto 48px; }
+
+:focus-visible { outline: 4px solid var(--oro); outline-offset: 3px; border-radius: 6px; }
+
+.skip {
+  position: absolute; left: 1rem; top: -4rem; z-index: 50;
+  background: var(--ink); color: var(--paper); padding: .75rem 1rem; border-radius: .75rem;
+}
+.skip:focus { top: 1rem; }
+
+.prose-es h2 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.75rem; line-height: 1.2; margin: 2.5rem 0 .75rem; }
+.prose-es h3 { font-weight: 700; font-size: 1.25rem; margin: 1.75rem 0 .5rem; }
+.prose-es p, .prose-es ul, .prose-es ol { margin: 0 0 1rem; }
+.prose-es ul { list-style: disc; padding-left: 1.5rem; }
+.prose-es ol { list-style: decimal; padding-left: 1.5rem; }
+.prose-es li { margin: .25rem 0; }
+.prose-es a { color: var(--cobalt); text-decoration: underline; text-underline-offset: 3px; }
+.prose-es table { width: 100%; border-collapse: collapse; margin: 0 0 1.25rem; font-size: 1rem; }
+.prose-es th, .prose-es td { border: 1px solid var(--line); padding: .6rem .75rem; text-align: left; vertical-align: top; }
+.prose-es th { background: var(--mist); }
+.table-wrap { overflow-x: auto; }
+.note { background: #fff8e1; border-left: 6px solid var(--oro); padding: 1rem 1.25rem; border-radius: .75rem; }
