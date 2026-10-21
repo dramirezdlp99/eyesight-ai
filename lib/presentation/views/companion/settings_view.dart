@@ -114,16 +114,40 @@ class SettingsView extends GetView<SettingsController> {
                       value: s.vibration,
                       onChanged: controller.setVibration,
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.vibration),
-                        label: const Text('Probar vibración'),
-                        onPressed: () {
-                          unawaited(controller.testVibration());
-                          showNotice(context, SettingsController.vibrationTest);
-                        },
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Pitidos suaves'),
+                      subtitle: const Text(
+                        'Mismo código que la vibración; útil si el teléfono '
+                        'no vibra con la cámara encendida',
                       ),
+                      value: s.beeps,
+                      onChanged: controller.setBeeps,
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.vibration),
+                          label: const Text('Probar vibración'),
+                          onPressed: () {
+                            unawaited(controller.testVibration());
+                            showNotice(
+                              context,
+                              SettingsController.vibrationTest,
+                            );
+                          },
+                        ),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.volume_up_outlined),
+                          label: const Text('Probar pitidos'),
+                          onPressed: () {
+                            unawaited(controller.testBeeps());
+                            showNotice(context, SettingsController.beepsTest);
+                          },
+                        ),
+                      ],
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
