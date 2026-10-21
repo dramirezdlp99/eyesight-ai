@@ -13,6 +13,7 @@ class MetricSample {
     this.detectedLabel,
     this.confidence,
     this.groundTruth,
+    this.threads,
     this.lat,
     this.lng,
   });
@@ -29,6 +30,9 @@ class MetricSample {
 
   /// Etiqueta real elegida por el investigador (HU15, CA2).
   final String? groundTruth;
+
+  /// Hilos del procesador usados por el modelo en esta medición.
+  final int? threads;
   final double? lat;
   final double? lng;
 }
@@ -115,6 +119,7 @@ abstract final class MetricsCsv {
     'clase_detectada',
     'confianza',
     'etiqueta_real',
+    'hilos',
   ];
 
   /// Por privacidad, las coordenadas solo se incluyen si el investigador las
@@ -136,6 +141,7 @@ abstract final class MetricsCsv {
           s.detectedLabel ?? '',
           s.confidence?.toStringAsFixed(4) ?? '',
           s.groundTruth ?? '',
+          s.threads?.toString() ?? '',
           if (includeCoordinates) ...[
             s.lat?.toStringAsFixed(6) ?? '',
             s.lng?.toStringAsFixed(6) ?? '',
