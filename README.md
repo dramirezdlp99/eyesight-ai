@@ -40,7 +40,7 @@ historias de usuario tiene una prueba automática que lo verifica.
 | 2 | IA en el dispositivo: modelo LiteRT, cámara, hilo aislado, entrenamiento en `ml/` | HU02, HU03 |
 | 3 | Usuario final: perfiles, escáner, voz, vibración, comandos, gestos, zonas automáticas y manuales | HU01–HU09 |
 | 4 | Acompañante e investigador: mapa, edición, historial, ajustes, privacidad, modo de pruebas | HU10–HU15 |
-| 5 | Entrega: firma, ofuscación, APK de producción y manual técnico | RNF15 |
+| 5 | Entrega: copia cifrada de zonas, hilos configurables, vibración reforzada, ícono, firma y ofuscación, página web y documentación | HU10, HU14, HU15, RNF15 |
 
 ## Desarrollo local (PowerShell)
 
@@ -139,7 +139,7 @@ Después del PIN, el acompañante tiene cuatro pestañas:
 | Mapa | Zonas en un mapa de OpenStreetMap y en una lista filtrable por origen; tocar una zona la edita (tipo, radio, nota) o la elimina | HU10, HU11 |
 | Historial | Alertas por fecha (hoy, 7 días, 30 días, todo) y tipo, con la gráfica de la semana; se borran solas a los 90 días | HU12 |
 | Ajustes | Velocidad y volumen de la voz con frase de ejemplo, vibración, zonas automáticas, radio, confianza mínima, cámara y modo de pruebas | HU13, HU15 |
-| Privacidad | Datos guardados, permisos, cambio de PIN y borrado total escribiendo «ELIMINAR» | HU14 |
+| Privacidad | Datos guardados, permisos, cambio de PIN, copia de seguridad cifrada de zonas (exportar e importar) y borrado total escribiendo «ELIMINAR» | HU14 |
 
 Sin internet todo funciona; solo el plano del mapa no carga (HU10, CA2). El modo de pruebas
 registra cada cuadro con el caso de prueba (CP-02 a CP-07) y la etiqueta real elegida por el
@@ -167,3 +167,25 @@ que el decodificador de la aplicación queda verificado contra el modelo real.
 - Las claves de firma (`*.jks`, `key.properties`) están excluidas del repositorio.
 - El PIN del acompañante se guarda como resumen PBKDF2-HMAC-SHA256 con sal.
 - Las exportaciones CSV neutralizan fórmulas de hoja de cálculo.
+- La copia de zonas se cifra con AES-256-CBC y se autentica con HMAC-SHA256; la clave sale de
+  una contraseña del acompañante (PBKDF2, 100 000 iteraciones). Lo hace `ZoneBackup`.
+
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [`docs/decisiones-de-diseno.md`](docs/decisiones-de-diseno.md) | Decisiones de arquitectura: local-first, Hive, por qué no hay nube, OpenStreetMap, despliegue, cámara USB y rendimiento |
+| [`docs/manual-de-usuario.md`](docs/manual-de-usuario.md) | Manual para usuarios y acompañantes |
+| [`docs/politica-de-privacidad.md`](docs/politica-de-privacidad.md) | Política de privacidad (Ley 1581 de 2012) |
+| [`docs/resultados-pruebas.md`](docs/resultados-pruebas.md) | Resultados medidos en el teléfono (CP-02, CP-04) |
+| [`docs/kit-validacion.md`](docs/kit-validacion.md) | Guion, tareas, SUS y clasificación de comentarios para la validación con usuarios |
+| [`docs/publicacion.md`](docs/publicacion.md) | Firma, APK de producción, GitHub Releases, GitHub Pages y Google Play |
+
+## Página web y descarga
+
+- Página: <https://dramirezdlp99.github.io/eyesight-ai/> (carpeta `website/`, publicada por
+  `.github/workflows/pages.yml`).
+- APK: <https://github.com/dramirezdlp99/eyesight-ai/releases/latest/download/EyeSight-AI.apk>.
+- `website/manual.html` y `website/privacidad.html` se generan a partir de los archivos de `docs/`.
+  `website/tailwind.css` se compila con
+  `npx tailwindcss@3.4.17 -i tailwind.src.css -o tailwind.css --minify` desde `website/`.
