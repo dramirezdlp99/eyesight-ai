@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:eyesight_ai/core/ai/i_obstacle_detector.dart';
 import 'package:eyesight_ai/core/device/file_exporter.dart';
+import 'package:eyesight_ai/core/device/earcons.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
@@ -59,6 +60,7 @@ void main() {
     expect(Get.isRegistered<ISpeechService>(), isTrue);
     expect(Get.isRegistered<IVoiceInput>(), isTrue);
     expect(Get.isRegistered<IHaptics>(), isTrue);
+    expect(Get.isRegistered<IEarcons>(), isTrue);
     expect(Get.isRegistered<ILocationService>(), isTrue);
     expect(Get.isRegistered<IPermissionGuard>(), isTrue);
     expect(Get.isRegistered<IWakelock>(), isTrue);
