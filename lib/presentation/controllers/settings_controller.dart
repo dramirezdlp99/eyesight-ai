@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
 
 import '../../core/config/app_constants.dart';
+import '../../core/device/haptics.dart';
 import '../../core/device/speech_service.dart';
 import '../../core/device/video_source_selector.dart';
 import '../../core/security/input_validators.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/entities/video_source_kind.dart';
 import '../../domain/repositories/i_settings_repository.dart';
+import '../../domain/usecases/alert_policy.dart';
 
 /// Ajustes de la herramienta (HU13, RF18, RF19; diagrama de clases:
 /// SettingsController). Cada cambio válido se guarda de inmediato.
@@ -15,13 +17,16 @@ class SettingsController extends GetxController {
     required ISettingsRepository settings,
     required ISpeechService speech,
     required VideoSourceSelector sources,
+    IHaptics? haptics,
   })  : _settings = settings,
         _speech = speech,
-        _sources = sources;
+        _sources = sources,
+        _haptics = haptics;
 
   final ISettingsRepository _settings;
   final ISpeechService _speech;
   final VideoSourceSelector _sources;
+  final IHaptics? _haptics;
 
   /// Frase de ejemplo al cambiar la voz (HU13, CA1).
   static const String sample =
@@ -29,6 +34,9 @@ class SettingsController extends GetxController {
   static const String usbMissing =
       'No hay una cámara USB conectada. Se mantiene la cámara del teléfono.';
   static const String resetDone = 'Se restablecieron los valores por defecto.';
+  static const String vibrationTest =
+      'Debió sentir 3 pulsos, como un obstáculo cercano. Si no los sintió, '
+      'revise la vibración de alarmas en los ajustes del teléfono.';
 
   final Rx<AppSettings> value = const AppSettings().obs;
 
@@ -95,6 +103,12 @@ class SettingsController extends GetxController {
     message.value = null;
     await _save(value.value.copyWith(confidenceThreshold: threshold));
     return true;
+  }
+
+  /// Reproduce el patrón de «cerca» para comprobar que se siente, aunque la
+  /// vibración de las alertas esté desactivada.
+  Future<void> testVibration() async {
+    await _haptics?.play(HapticPatterns.near);
   }
 
   Future<void> setVibration(bool enabled) =>
