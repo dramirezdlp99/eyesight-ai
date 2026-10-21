@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Política de privacidad · EyeSight AI</title>
+  <meta name="description" content="EyeSight AI no recopila datos: todo se procesa y guarda cifrado en el teléfono.">
+  <meta name="theme-color" content="#2340D9">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <!-- Generado desde docs/politica-de-privacidad.md. Si cambia el texto, edite ese archivo y regenere esta página. -->
+  <header class="bg-cobalt text-paper">
+    <nav class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4" aria-label="Principal">
+      <a href="./" class="flex items-center gap-3 font-display text-2xl">
+        <img src="img/logo-192.png" alt="" width="44" height="44" class="rounded-xl">
+        EyeSight AI
+      </a>
+      <ul class="flex flex-wrap gap-x-5 gap-y-1 text-base font-bold"><li><a class="hover:underline underline-offset-4" href="manual.html">Manual</a></li><li><a class="hover:underline underline-offset-4" aria-current="page" href="privacidad.html">Privacidad</a></li><li><a class="hover:underline underline-offset-4" href="https://github.com/dramirezdlp99/eyesight-ai">Código</a></li></ul>
+    </nav>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+      <h1 class="font-display text-4xl sm:text-5xl leading-tight">Política de privacidad de EyeSight AI</h1>
+    </div>
+    <div class="greca" role="presentation"></div>
+  </header>
+  <main id="contenido" class="max-w-4xl mx-auto px-4 sm:px-6 py-10 prose-es">
+<p>Última actualización: 21 de octubre de 2026.</p>
+<p>EyeSight AI es una aplicación Android de apoyo a la movilidad de personas con discapacidad
+visual, desarrollada como trabajo de grado de Ingeniería de Software en la Universidad
+Cooperativa de Colombia, sede Pasto.</p>
+<p>Esta política explica qué datos usa la aplicación y cómo los protege, conforme a la Ley 1581 de
+2012 y el Decreto 1377 de 2013.</p>
+<h2 id="resumen">Resumen</h2>
+<ul>
+<li><strong>No recopilamos sus datos.</strong> La aplicación no tiene servidores, cuentas ni base de datos en la
+  nube.</li>
+<li>Todo se procesa y se guarda <strong>en su teléfono</strong>, cifrado con AES-256.</li>
+<li><strong>Nadie más puede ver su información</strong>, ni siquiera el desarrollador.</li>
+<li><strong>No hay publicidad, analítica ni rastreadores.</strong></li>
+</ul>
+<h2 id="datos-que-usa-la-aplicacion-y-donde-quedan">Datos que usa la aplicación y dónde quedan</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Dato</th>
+<th>Para qué</th>
+<th>Dónde queda</th>
+<th>¿Sale del teléfono?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Imágenes de la cámara</td>
+<td>Detectar obstáculos con el modelo de inteligencia artificial</td>
+<td>Solo en la memoria, mientras se analizan; no se guardan</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Audio del micrófono</td>
+<td>Reconocer los comandos de voz</td>
+<td>Lo procesa el servicio de reconocimiento de voz de Android</td>
+<td>Depende de Android (ver abajo)</td>
+</tr>
+<tr>
+<td>Ubicación (GPS)</td>
+<td>Avisar las zonas de riesgo y registrar las nuevas</td>
+<td>Base de datos cifrada en el teléfono</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Zonas de riesgo</td>
+<td>Avisar lugares peligrosos</td>
+<td>Base de datos cifrada en el teléfono</td>
+<td>Solo si usted las exporta</td>
+</tr>
+<tr>
+<td>Historial de alertas</td>
+<td>Que el acompañante vea las alertas recientes</td>
+<td>Base de datos cifrada; se borra a los 90 días</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ajustes y PIN</td>
+<td>Personalizar la app y proteger el perfil de acompañante</td>
+<td>Teléfono; el PIN se guarda como resumen irreversible (PBKDF2)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="servicios-de-terceros">Servicios de terceros</h2>
+<ul>
+<li><strong>Reconocimiento de voz de Android (Google).</strong> Si su teléfono no tiene el paquete de español
+  sin conexión, Android puede enviar el audio del comando a Google para convertirlo en texto. Se
+  rige por la política de privacidad de Google. Si instala el paquete sin conexión, el audio no
+  sale del teléfono. También puede usar botones y gestos en lugar de la voz.</li>
+<li><strong>Mapas de OpenStreetMap.</strong> En el perfil de acompañante, el mapa descarga las imágenes del
+  plano desde los servidores de OpenStreetMap, que reciben la dirección IP y la zona del mapa
+  solicitada, como ocurre con cualquier página web. Las zonas de riesgo <strong>no</strong> se envían. Se rige
+  por la <a href="https://osmfoundation.org/wiki/Privacy_Policy">política de privacidad de la Fundación OpenStreetMap</a>.</li>
+</ul>
+<h2 id="exportacion-de-zonas">Exportación de zonas</h2>
+<p>El acompañante puede exportar las zonas como un texto cifrado con una contraseña que él mismo
+elige (AES-256 y HMAC-SHA256). Ese texto solo se comparte si usted lo envía, por ejemplo por
+WhatsApp o por correo. Sin la contraseña, el contenido no se puede leer.</p>
+<h2 id="modo-de-pruebas">Modo de pruebas</h2>
+<p>El modo de pruebas, de uso del investigador, exporta un archivo CSV con tiempos de respuesta y
+detecciones. Por defecto <strong>no</strong> incluye coordenadas, y solo se comparte si el investigador lo
+envía.</p>
+<h2 id="sus-derechos">Sus derechos</h2>
+<p>Usted puede conocer, actualizar y suprimir su información en cualquier momento, desde la propia
+aplicación:
+- <strong>Ver</strong> cuántos datos hay guardados y qué permisos están activos (Acompañante → Privacidad).
+- <strong>Editar o eliminar</strong> cada zona de riesgo.
+- <strong>Borrar todo</strong> escribiendo «ELIMINAR»: se borran las zonas, el historial, los ajustes, el PIN y
+  la clave de cifrado.
+- <strong>Retirar los permisos</strong> desde los ajustes de Android.
+- <strong>Desinstalar</strong> la aplicación, lo que elimina todos sus datos.</p>
+<h2 id="menores-de-edad">Menores de edad</h2>
+<p>La aplicación no está dirigida específicamente a menores y no recopila datos de ninguna persona.</p>
+<h2 id="cambios-en-esta-politica">Cambios en esta política</h2>
+<p>Si esta política cambia, se publicará aquí con la nueva fecha de actualización.</p>
+<h2 id="contacto">Contacto</h2>
+<p>Responsable: David Fernando Ramírez de la Parra, Universidad Cooperativa de Colombia, sede Pasto.
+Para preguntas, escriba en
+<a href="https://github.com/dramirezdlp99/eyesight-ai/issues">https://github.com/dramirezdlp99/eyesight-ai/issues</a>.</p>
+  </main>
+  <footer class="bg-ink text-paper">
+    <div class="greca" role="presentation"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex flex-wrap gap-4 justify-between text-base">
+      <p>© 2026 EyeSight AI · Pasto, Colombia</p>
+      <p><a class="underline underline-offset-4" href="./">Inicio</a> ·
+        <a class="underline underline-offset-4" href="privacidad.html">Privacidad</a> ·
+        <a class="underline underline-offset-4" href="manual.html">Manual</a></p>
+    </div>
+  </footer>
+</body>
+</html>
