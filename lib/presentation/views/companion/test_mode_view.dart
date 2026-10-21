@@ -129,6 +129,31 @@ class TestModeView extends GetView<TestModeController> {
                             ? null
                             : (v) => controller.includeCoordinates.value = v,
                       ),
+                      const SizedBox(height: 4),
+                      Text('Hilos del procesador para el modelo',
+                          style: text.titleMedium),
+                      Text(
+                        'Mida con cada opción y deje la más rápida: el '
+                        'escáner usa el mismo valor.',
+                        style: text.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final n in AppConstants.inferenceThreadOptions)
+                            ChoiceChip(
+                              label: Text('$n hilos'),
+                              selected: controller.threads.value == n,
+                              onSelected: running
+                                  ? null
+                                  : (_) => controller.setThreads(n),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                   if (running) _Preview(controller: controller),
