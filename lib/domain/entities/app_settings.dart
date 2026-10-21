@@ -13,6 +13,7 @@ class AppSettings {
     this.videoSource = VideoSourceKind.phone,
     this.vibration = true,
     this.autoZones = true,
+    this.inferenceThreads = AppConstants.defaultInferenceThreads,
   });
 
   /// Reconstruye los ajustes desde Hive. Cualquier valor ausente o fuera de
@@ -48,6 +49,10 @@ class AppSettings {
               d.videoSource,
       vibration: map['vibration'] is bool ? map['vibration'] as bool : true,
       autoZones: map['autoZones'] is bool ? map['autoZones'] as bool : true,
+      inferenceThreads:
+          AppConstants.inferenceThreadOptions.contains(map['inferenceThreads'])
+              ? map['inferenceThreads'] as int
+              : d.inferenceThreads,
     );
   }
 
@@ -63,6 +68,10 @@ class AppSettings {
   final bool vibration;
   final bool autoZones;
 
+  /// Hilos del procesador para el modelo; se elige en el modo de pruebas
+  /// midiendo cuál es más rápido en el teléfono (RNF01).
+  final int inferenceThreads;
+
   AppSettings copyWith({
     UserProfile? profile,
     bool clearProfile = false,
@@ -73,6 +82,7 @@ class AppSettings {
     VideoSourceKind? videoSource,
     bool? vibration,
     bool? autoZones,
+    int? inferenceThreads,
   }) =>
       AppSettings(
         profile: clearProfile ? null : (profile ?? this.profile),
@@ -83,6 +93,7 @@ class AppSettings {
         videoSource: videoSource ?? this.videoSource,
         vibration: vibration ?? this.vibration,
         autoZones: autoZones ?? this.autoZones,
+        inferenceThreads: inferenceThreads ?? this.inferenceThreads,
       );
 
   /// Restablece los valores por defecto conservando el perfil (HU13, CA4).
@@ -97,6 +108,7 @@ class AppSettings {
         'videoSource': videoSource.name,
         'vibration': vibration,
         'autoZones': autoZones,
+        'inferenceThreads': inferenceThreads,
       };
 
   static double _inRange(Object? value, double min, double max, double def) {
@@ -119,7 +131,8 @@ class AppSettings {
       other.confidenceThreshold == confidenceThreshold &&
       other.videoSource == videoSource &&
       other.vibration == vibration &&
-      other.autoZones == autoZones;
+      other.autoZones == autoZones &&
+      other.inferenceThreads == inferenceThreads;
 
   @override
   int get hashCode => Object.hash(
@@ -131,5 +144,6 @@ class AppSettings {
         videoSource,
         vibration,
         autoZones,
+        inferenceThreads,
       );
 }
