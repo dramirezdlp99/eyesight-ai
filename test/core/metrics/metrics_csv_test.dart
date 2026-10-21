@@ -50,7 +50,7 @@ void main() {
       final lines = csv.trim().split('\r\n');
       expect(lines.first, MetricsCsv.header.join(','));
       expect(lines[1],
-          '2026-10-07T14:00:00.000Z,CP-02,8.00,86.00,,pole,0.8200,pole');
+          '2026-10-07T14:00:00.000Z,CP-02,8.00,86.00,,pole,0.8200,pole,');
       expect(csv.contains('1.213600'), isFalse);
     });
 
