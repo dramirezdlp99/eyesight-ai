@@ -111,6 +111,8 @@ void main() {
         ),
         wipe: () async => wipes++,
         navigate: (_) {},
+        zoneService: ZoneService(zones: zones, audit: audit, clock: () => t0),
+        exporter: FakeFileExporter(),
       ),
     );
   }
