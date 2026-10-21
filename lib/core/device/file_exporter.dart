@@ -8,6 +8,9 @@ abstract interface class IFileExporter {
   /// Guarda [contents] como [fileName] y abre el menú de compartir del
   /// teléfono. Devuelve la ruta del archivo.
   Future<String> export(String fileName, String contents);
+
+  /// Abre el menú de compartir con [text] (por ejemplo, para WhatsApp).
+  Future<void> shareText(String text, {String? subject});
 }
 
 /// Guarda el archivo en la carpeta temporal privada de la app y abre el
@@ -26,5 +29,10 @@ class ShareFileExporter implements IFileExporter {
       subject: fileName,
     );
     return file.path;
+  }
+
+  @override
+  Future<void> shareText(String text, {String? subject}) async {
+    await Share.share(text, subject: subject);
   }
 }
