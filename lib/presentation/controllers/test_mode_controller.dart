@@ -106,6 +106,9 @@ class TestModeController extends GetxController {
   final RxString groundTruth = 'none'.obs;
   final RxBool includeCoordinates = false.obs;
 
+  /// Hilos del modelo que se están midiendo (RNF01).
+  final RxInt threads = AppConstants.defaultInferenceThreads.obs;
+
   final RxDouble fps = 0.0.obs;
   final RxDouble inferenceMs = 0.0.obs;
   final RxnDouble captureToAlertMs = RxnDouble();
@@ -135,6 +138,27 @@ class TestModeController extends GetxController {
   bool get running => state.value == TestState.running;
 
   @override
+  void onInit() {
+    super.onInit();
+    unawaited(loadThreads());
+  }
+
+  Future<void> loadThreads() async {
+    threads.value = (await _settings.load()).inferenceThreads;
+  }
+
+  /// Cambia los hilos del modelo y los guarda: el escáner usará el mismo
+  /// valor. Solo con la medición detenida.
+  Future<void> setThreads(int value) async {
+    if (running || !AppConstants.inferenceThreadOptions.contains(value)) {
+      return;
+    }
+    threads.value = value;
+    final current = await _settings.load();
+    await _settings.save(current.copyWith(inferenceThreads: value));
+  }
+
+  @override
   void onClose() {
     unawaited(_close());
     super.onClose();
@@ -160,6 +184,7 @@ class TestModeController extends GetxController {
           !await _permissions.request(AppPermission.camera)) {
         throw StateError('Sin permiso de cámara');
       }
+      await _detector.setThreads(_config.inferenceThreads);
       await _detector.load();
       final choice = await _sources.choose(_config.videoSource);
       final stream = await choice.source.start();
@@ -281,6 +306,7 @@ class TestModeController extends GetxController {
           detectedLabel: shown?.label,
           confidence: shown?.confidence,
           groundTruth: groundTruth.value,
+          threads: threads.value,
           lat: p?.latitude,
           lng: p?.longitude,
         ),
