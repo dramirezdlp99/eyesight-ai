@@ -21,12 +21,14 @@ import 'tensor_codec.dart';
 /// servicio) y se corrige la conversión lenta de la versión preliminar.
 class YoloLiteRtDetector implements IObstacleDetector {
   YoloLiteRtDetector({
-    this.threads = 4,
+    int threads = 4,
     this.estimator = const ProximityEstimator(),
     AssetBundle? bundle,
-  }) : _bundle = bundle ?? rootBundle;
+  })  : _threads = threads,
+        _bundle = bundle ?? rootBundle;
 
-  final int threads;
+  int _threads;
+  int get threads => _threads;
   final ProximityEstimator estimator;
   final AssetBundle _bundle;
 
@@ -40,6 +42,17 @@ class YoloLiteRtDetector implements IObstacleDetector {
 
   @override
   bool get isReady => _toWorker != null;
+
+  @override
+  Future<void> setThreads(int threads) async {
+    if (threads == _threads || threads < 1) {
+      return;
+    }
+    _threads = threads;
+    if (isReady) {
+      await dispose();
+    }
+  }
 
   @override
   Future<void> load() async {
