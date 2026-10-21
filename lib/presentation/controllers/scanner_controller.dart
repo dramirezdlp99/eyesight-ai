@@ -9,6 +9,7 @@ import '../../core/ai/i_obstacle_detector.dart';
 import '../../core/ai/obstacle_catalog.dart';
 import '../../core/config/app_constants.dart';
 import '../../core/device/alert_manager.dart';
+import '../../core/device/earcons.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/i_video_source.dart';
 import '../../core/device/location_service.dart';
@@ -66,6 +67,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     required ISpeechService speech,
     required IVoiceInput voice,
     required IHaptics haptics,
+    IEarcons? earcons,
     required ILocationService location,
     required IPermissionGuard permissions,
     required IWakelock wakelock,
@@ -90,7 +92,11 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
         _zoneService = zoneService,
         _clock = clock ?? DateTime.now,
         _periodic = periodic ?? Timer.periodic,
-        alerts = AlertManager(speech: speech, haptics: haptics);
+        alerts = AlertManager(
+          speech: speech,
+          haptics: haptics,
+          earcons: earcons,
+        );
 
   final IObstacleDetector _detector;
   final VideoSourceSelector _sources;
@@ -272,6 +278,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
     status.value = 'Iniciando el escáner';
     _config = await _settings.load();
     alerts.vibration = _config.vibration;
+    alerts.beeps = _config.beeps;
     await _speech.configure(rate: _config.speechRate, volume: _config.volume);
 
     // CA2: explica para qué se usa el permiso antes de pedirlo.
