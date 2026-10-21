@@ -2,6 +2,7 @@ import 'package:eyesight_ai/core/device/permission_guard.dart';
 import 'package:eyesight_ai/core/device/video_source_selector.dart';
 import 'package:eyesight_ai/core/security/pin_guard.dart';
 import 'package:eyesight_ai/core/security/pin_hasher.dart';
+import 'package:eyesight_ai/core/security/zone_backup.dart';
 import 'package:eyesight_ai/domain/entities/app_settings.dart';
 import 'package:eyesight_ai/domain/entities/detection_record.dart';
 import 'package:eyesight_ai/domain/entities/proximity.dart';
@@ -259,7 +260,13 @@ void main() {
     late PinGuard pin;
     late List<String> routes;
     late int wipes;
+    late FakeFileExporter exporter;
     late PrivacyController c;
+
+    ZoneBackup fastBackup() => ZoneBackup(
+          iterations: 1000,
+          derive: (p, s, it) async => PinHasher.pbkdf2(p, s, it, 64),
+        );
 
     setUp(() async {
       zones = InMemoryZoneRepository()..zones['a'] = zone(id: 'a');
@@ -276,6 +283,7 @@ void main() {
       await pin.setPin('1357');
       routes = [];
       wipes = 0;
+      exporter = FakeFileExporter();
       c = PrivacyController(
         zones: zones,
         history: history,
@@ -284,6 +292,9 @@ void main() {
         pin: pin,
         wipe: () async => wipes++,
         navigate: routes.add,
+        zoneService: ZoneService(zones: zones, audit: audit, clock: () => t0),
+        exporter: exporter,
+        backup: fastBackup(),
       );
       await c.load();
     });
@@ -295,6 +306,65 @@ void main() {
       expect(c.permissions[AppPermission.camera], isTrue);
       expect(c.permissions[AppPermission.location], isFalse);
       expect(permissions.requested, isEmpty);
+    });
+
+    test('exportar e importar zonas cifradas en otro teléfono', () async {
+      zones.zones['b'] = zone(id: 'b', type: 'step', note: 'Frente al parque');
+      expect(await c.exportZones('secreta1', 'secreta1'), isNull);
+      final text = exporter.shared.single;
+      expect(text, startsWith(ZoneBackup.header));
+      expect(text, isNot(contains('Frente al parque'))); // va cifrado
+
+      // Otro teléfono, sin zonas.
+      final otherZones = InMemoryZoneRepository();
+      final otherAudit = InMemoryAuditRepository();
+      final other = PrivacyController(
+        zones: otherZones,
+        history: InMemoryHistoryRepository(),
+        audit: otherAudit,
+        permissions: permissions,
+        pin: pin,
+        wipe: () async {},
+        navigate: (_) {},
+        zoneService: ZoneService(zones: otherZones, audit: otherAudit),
+        exporter: FakeFileExporter(),
+        backup: fastBackup(),
+      );
+      final (ok, message) = await other.importZones(text, 'secreta1');
+      expect(ok, isTrue);
+      expect(message, contains('2 zonas'));
+      expect(otherZones.zones['b']!.note, 'Frente al parque');
+      expect(otherAudit.entries, hasLength(2));
+
+      // Importar de nuevo no duplica.
+      final (_, again) = await other.importZones(text, 'secreta1');
+      expect(again, contains('0 zonas'));
+      expect(otherZones.zones, hasLength(2));
+    });
+
+    test('la importación rechaza contraseña incorrecta y texto incompleto',
+        () async {
+      await c.exportZones('secreta1', 'secreta1');
+      final text = exporter.shared.single;
+      final (ok1, wrong) = await c.importZones(text, 'otraclave');
+      expect(ok1, isFalse);
+      expect(wrong, contains('incorrecta'));
+      final (ok2, partial) =
+          await c.importZones(text.substring(0, text.length ~/ 2), 'secreta1');
+      expect(ok2, isFalse);
+      expect(partial, isNotEmpty);
+      final (ok3, foreign) = await c.importZones('hola', 'secreta1');
+      expect(ok3, isFalse);
+      expect(foreign, contains('no es una copia'));
+    });
+
+    test('exportar valida la contraseña y que haya zonas', () async {
+      expect(await c.exportZones('123', '123'), contains('6 caracteres'));
+      expect(
+          await c.exportZones('secreta1', 'secreta2'), contains('coinciden'));
+      zones.zones.clear();
+      expect(await c.exportZones('secreta1', 'secreta1'), contains('no hay'));
+      expect(exporter.shared, isEmpty);
     });
 
     test('CA2: sin escribir ELIMINAR no borra nada', () async {
