@@ -4,8 +4,7 @@
 **Modelo:** YOLOv8n preentrenado en COCO, float32, entrada de 320 px (12,7 MB).
 **Datos:** CSV exportados con el modo de pruebas (HU15).
 
-Los casos marcados como «pendiente» se completan con el modelo INT8 ajustado a Pasto y con la
-medición de hilos del Bloque 5.
+Los casos marcados como «pendiente» se completan con el modelo INT8 ajustado a Pasto.
 
 ## Resumen
 
@@ -47,16 +46,34 @@ medición de hilos del Bloque 5.
   1. Selector de hilos (2, 4 o 6) en el modo de pruebas, para elegir el más rápido.
   2. Modelo INT8, que suele ser de 2 a 3 veces más rápido en CPU móvil.
 
-### CP-02b. Hilos del procesador (pendiente)
+### CP-02b. Hilos del procesador
 
-Se repite la prueba con 60 s por configuración, frente a una escena con personas, y se exporta un
-CSV por cada una. La columna `hilos` del CSV identifica la configuración.
+Medición del 21 de octubre de 2026, en el mismo lugar y con la misma luz, frente a una persona. Se
+hizo una corrida por configuración (de 43 a 50 s cada una) con el modelo base en float32. La
+columna `hilos` del CSV identifica cada configuración.
 
-| Hilos | Inferencia media (ms) | p95 (ms) | fps | Captura a alerta media (ms) |
-|---|---|---|---|---|
-| 2 | | | | |
-| 4 | | | | |
-| 6 | | | | |
+| Hilos | Cuadros | Inferencia media (ms) | Mediana (ms) | p95 (ms) | fps | Alertas ≤ 500 ms | Captura a alerta media (ms) | Persona detectada |
+|---|---|---|---|---|---|---|---|---|
+| 2 | 159 | 232,9 | 229,0 | 296,3 | 3,70 | 10 de 10 | 268,2 | 97,5 % |
+| 4 | 159 | 233,5 | 227,3 | 319,7 | 3,64 | 13 de 13 | 265,2 | 93,1 % |
+| 6 | 182 | 235,2 | 227,6 | 317,9 | 3,63 | 11 de 12 (máximo 517,8 ms) | 282,4 | 98,4 % |
+
+**Análisis.**
+- La diferencia entre 2, 4 y 6 hilos es menor de 3 ms en la media y de 2 ms en la mediana. Es
+  menor que la variación normal entre cuadros, así que **el número de hilos no cambia el
+  rendimiento** en este teléfono.
+- Una explicación probable: el procesador del vivo Y22s tiene pocos núcleos rápidos, y los hilos
+  extra caen en núcleos lentos que no aceleran la inferencia. El cuello de botella sería el
+  cómputo en float32 del modelo, no el paralelismo.
+- Se deja el valor por defecto, **4 hilos**, porque tiene la mejor mediana y ninguna alerta pasó
+  de 500 ms.
+- En total, 34 de 35 alertas (97,1 %) llegaron en 500 ms o menos. La única que pasó (517,8 ms)
+  coincidió con una inferencia aislada de 491 ms, un pico puntual del sistema.
+- Las medias, de unos 233 ms, son algo mayores que en la primera corrida de CP-02 (202 ms). La
+  diferencia probablemente se debe a la temperatura del teléfono tras corridas seguidas y a otras
+  apps en segundo plano. Por eso las comparaciones se hacen dentro de la misma sesión.
+- **Conclusión:** la mejora de RNF01 y RNF03 no vendrá de los hilos sino del modelo **INT8**
+  (CP-02c), que reduce el cómputo por cuadro.
 
 ### CP-02c. Modelo INT8 ajustado (pendiente)
 
@@ -71,7 +88,7 @@ CSV por cada una. La columna `hilos` del CSV identifica la configuración.
 |---|---|---|
 | Detección de obstáculos | Funciona | El modelo corre en el teléfono |
 | Alertas por voz (TTS) | Funciona | Síntesis de voz sin conexión |
-| Vibración | Funciona | Se sentía débil; en el Bloque 5 se reforzaron los patrones y la intensidad |
+| Vibración | Funciona | Se sentía débil. En la v1.0.0 se alargaron los pulsos y se forzó la intensidad máxima, pero con ese modo dejó de sentirse en el vivo Y22s. En la v1.0.1 se vuelve a la intensidad por defecto con los pulsos largos, y se agrega «Probar vibración» en Ajustes |
 | Comandos de voz | No funcionan sin el paquete de español sin conexión | La app pasa a botones y gestos (RNF05). Se repite la prueba con el paquete instalado |
 | Guardar zona con GPS | Funciona | El GPS no necesita internet |
 | Mapa del acompañante | El plano queda en blanco; las zonas y la lista funcionan | Esperado (HU10, CA2) |
