@@ -165,6 +165,14 @@ class SettingsView extends GetView<SettingsController> {
                           ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'La cámara USB es experimental en esta versión: si no '
+                      'responde, la app usa la cámara del teléfono.',
+                      style: text.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
                 OutlinedButton.icon(
