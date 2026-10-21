@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:eyesight_ai/core/device/earcons.dart';
 import 'package:eyesight_ai/core/device/file_exporter.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
@@ -77,6 +78,13 @@ class FakeVoice implements IVoiceInput {
       open.complete(null);
     }
   }
+}
+
+class FakeEarcons implements IEarcons {
+  final List<List<Tone>> played = [];
+
+  @override
+  Future<void> play(List<Tone> tones) async => played.add(tones);
 }
 
 class FakeHaptics implements IHaptics {
