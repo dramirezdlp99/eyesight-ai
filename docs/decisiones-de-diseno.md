@@ -137,19 +137,55 @@ no carga, pero las zonas y la lista sí (HU10, CA2).
 
 ## ADR-7. Despliegue
 
+**Qué es el despliegue en este proyecto.** Desplegar es poner el software en su entorno de
+producción, donde los usuarios lo usan. En una aplicación cliente-servidor, ese entorno es un
+servidor. En EyeSight AI, que es local-first (ADR-1), el entorno de producción es **el teléfono
+de cada usuario**. El despliegue consiste en compilar, firmar, versionar y distribuir el APK, y
+publicar el sitio web que lo acompaña.
+
+**Despliegue realizado (versión 1.0.0, 21 de octubre de 2026):**
+
+| Paso | Cómo se hizo |
+|---|---|
+| Compilación de producción | `flutter build apk --release --obfuscate --split-debug-info`: código Dart ofuscado y R8 para Java/Kotlin |
+| Firma | Clave RSA de 2048 bits propia (`upload`), guardada fuera del repositorio; esquema APK Signature v2 verificado con `apksigner` |
+| Versionado | Etiqueta Git `v1.0.0` y `version: 1.0.0+1` en `pubspec.yaml` |
+| Distribución del APK | GitHub Releases: `https://github.com/dramirezdlp99/eyesight-ai/releases/latest/download/EyeSight-AI.apk` |
+| Sitio web | GitHub Pages (`https://dramirezdlp99.github.io/eyesight-ai/`), publicado automáticamente por GitHub Actions en cada cambio de `website/` |
+| Integración continua | GitHub Actions ejecuta formato, análisis estático y pruebas en cada *push* |
+| Verificación | Instalación desde la página en el vivo Y22s |
+
+**Diagrama de despliegue (nodos):**
+- **Teléfono Android 8.0 o superior** (dispositivo). Contiene el artefacto `EyeSight-AI.apk`, que
+  incluye:
+  - la app Flutter;
+  - el modelo YOLOv8n en LiteRT;
+  - Hive cifrado, con la clave en el Android Keystore.
+
+  Usa los servicios del sistema: cámara, GPS, TTS, reconocimiento de voz y vibración.
+- **GitHub** (nube):
+  - *Releases* aloja el APK;
+  - *Pages* aloja el sitio (inicio, privacidad, manual);
+  - *Actions* ejecuta el CI y la publicación del sitio.
+- **Servidor de teselas de OpenStreetMap** (externo, HTTPS). Solo lo usa el mapa del acompañante.
+- **PC del desarrollador.** Compila y firma; guarda la clave y los símbolos de depuración.
+
+**Canales de distribución:**
+
 | Canal | Costo | Estado |
 |---|---|---|
-| APK en GitHub Releases | Gratis | Disponible: prototipo en fase de pruebas |
-| Página web en GitHub Pages: presentación, política de privacidad y manual | Gratis | Disponible |
+| APK en GitHub Releases | Gratis | **Desplegado** (v1.0.0, prototipo en fase de pruebas) |
+| Página web en GitHub Pages: presentación, política de privacidad y manual | Gratis | **Desplegado** |
 | Google Play | USD 25, un solo pago | Fase siguiente |
 
 Requisitos de Google Play:
 - prueba cerrada con 12 testers durante 14 días;
 - formato AAB;
-- política de privacidad con URL pública;
+- política de privacidad con URL pública (ya disponible);
 - formulario de seguridad de los datos.
 
-El APK y el AAB de producción se firman con una clave propia que **no** está en el repositorio.
+El AAB permite que Play entregue a cada teléfono solo el código de su procesador. El APK universal
+pesa 83,6 MB; el AAB, unos 30 MB por dispositivo.
 
 ## ADR-8. Cámara USB
 
