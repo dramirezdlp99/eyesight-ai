@@ -157,6 +157,7 @@ abstract final class AppPages {
             settings: Get.find<ISettingsRepository>(),
             speech: Get.find<ISpeechService>(),
             sources: Get.find<VideoSourceSelector>(),
+            haptics: Get.find<IHaptics>(),
           ),
         );
         Get.lazyPut<PrivacyController>(
