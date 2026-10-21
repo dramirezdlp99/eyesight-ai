@@ -8,6 +8,7 @@ import '../../core/ai/i_obstacle_detector.dart';
 import '../../core/config/app_constants.dart';
 import '../../core/device/alert_manager.dart';
 import '../../core/device/file_exporter.dart';
+import '../../core/device/earcons.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/i_video_source.dart';
 import '../../core/device/location_service.dart';
@@ -52,6 +53,7 @@ class TestModeController extends GetxController {
     required ISettingsRepository settings,
     required ISpeechService speech,
     required IHaptics haptics,
+    IEarcons? earcons,
     required ILocationService location,
     required IPermissionGuard permissions,
     required IWakelock wakelock,
@@ -68,7 +70,11 @@ class TestModeController extends GetxController {
         _exporter = exporter,
         logger = logger ?? MetricsLogger(),
         _clock = clock ?? DateTime.now,
-        _alerts = AlertManager(speech: speech, haptics: haptics);
+        _alerts = AlertManager(
+          speech: speech,
+          haptics: haptics,
+          earcons: earcons,
+        );
 
   final IObstacleDetector _detector;
   final VideoSourceSelector _sources;
@@ -179,6 +185,7 @@ class TestModeController extends GetxController {
     try {
       _config = await _settings.load();
       _alerts.vibration = _config.vibration;
+      _alerts.beeps = _config.beeps;
       await _speech.configure(rate: _config.speechRate, volume: _config.volume);
       if (!await _permissions.isGranted(AppPermission.camera) &&
           !await _permissions.request(AppPermission.camera)) {
