@@ -6,17 +6,20 @@ import '../entities/proximity.dart';
 /// Patrones de vibración en milisegundos: espera, vibra, espera, vibra…
 /// (HU04).
 abstract final class HapticPatterns {
-  /// Cerca: 3 pulsos cortos.
-  static const List<int> near = [0, 120, 90, 120, 90, 120];
+  // Pulsos de 220 a 400 ms: en las pruebas de campo los de 120 ms casi no
+  // se sentían en un teléfono de gama baja.
+
+  /// Cerca: 3 pulsos.
+  static const List<int> near = [0, 220, 110, 220, 110, 220];
 
   /// Media distancia: 2 pulsos.
-  static const List<int> medium = [0, 160, 120, 160];
+  static const List<int> medium = [0, 300, 150, 300];
 
   /// Lejos: 1 pulso.
-  static const List<int> far = [0, 200];
+  static const List<int> far = [0, 400];
 
   /// Zona de riesgo: 1 pulso largo, distinguible de los demás (HU04, CA3).
-  static const List<int> zone = [0, 700];
+  static const List<int> zone = [0, 900];
 
   static List<int> forProximity(Proximity proximity) => switch (proximity) {
         Proximity.near => near,
