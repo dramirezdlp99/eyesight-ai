@@ -90,6 +90,10 @@ abstract final class AppConstants {
   static const double minConfidenceThreshold = 0.30;
   static const double maxConfidenceThreshold = 0.90;
 
+  /// Hilos del procesador para el modelo (modo de pruebas, RNF01).
+  static const int defaultInferenceThreads = 4;
+  static const List<int> inferenceThreadOptions = [2, 4, 6];
+
   /// Velocidad de la voz como multiplicador (1,0x = normal).
   static const double defaultSpeechRate = 1.0;
   static const double minSpeechRate = 0.5;
