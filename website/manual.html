@@ -28,7 +28,7 @@
   </header>
   <main id="contenido" class="max-w-4xl mx-auto px-4 sm:px-6 py-10 prose-es">
 <p>Versión 1.0.0 · Android 8.0 o superior</p>
-<p>EyeSight AI avisa con voz y vibración los obstáculos que tiene al frente: personas, vehículos,
+<p>EyeSight AI avisa con voz, vibración y pitidos suaves los obstáculos que tiene al frente: personas, vehículos,
 bicicletas, bancas, semáforos y otros. También le avisa cuando se acerca a zonas de riesgo que usted o su
 acompañante registraron.</p>
 <div class="note mb-6">
@@ -107,7 +107,7 @@ usar un soporte o un cordón. El escáner arranca solo y dice «Escáner activo�
 <tr>
 <th>Cercanía</th>
 <th>Voz</th>
-<th>Vibración</th>
+<th>Vibración y pitidos</th>
 <th>Color en pantalla</th>
 </tr>
 </thead>
@@ -115,29 +115,30 @@ usar un soporte o un cordón. El escáner arranca solo y dice «Escáner activo�
 <tr>
 <td>Cerca</td>
 <td>«Poste, cerca, al frente»</td>
-<td>3 pulsos fuertes</td>
+<td>3 pulsos y 3 pitidos agudos</td>
 <td>Rojo</td>
 </tr>
 <tr>
 <td>Media distancia</td>
 <td>«Persona, a media distancia, a la izquierda»</td>
-<td>2 pulsos</td>
+<td>2 pulsos y 2 pitidos</td>
 <td>Amarillo</td>
 </tr>
 <tr>
 <td>Lejos</td>
 <td>«Banca, lejos, a la derecha»</td>
-<td>1 pulso</td>
+<td>1 pulso y 1 pitido grave</td>
 <td>Gris</td>
 </tr>
 <tr>
 <td>Zona de riesgo</td>
 <td>«Atención: hueco a 15 metros»</td>
-<td>1 pulso largo</td>
+<td>1 pulso largo y un tono doble</td>
 <td>Ondas</td>
 </tr>
 </tbody>
 </table></div>
+<p>Los pitidos siguen el volumen multimedia, igual que la voz. Se pueden apagar en Ajustes.</p>
 <h3 id="comandos">Comandos</h3>
 <div class="table-wrap"><table>
 <thead>
@@ -176,7 +177,7 @@ usar un soporte o un cordón. El escáner arranca solo y dice «Escáner activo�
 </tbody>
 </table></div>
 <ul>
-<li>Mientras la voz está en silencio, los obstáculos cercanos siguen vibrando.</li>
+<li>Mientras la voz está en silencio, los obstáculos cercanos siguen vibrando y pitando.</li>
 <li>Con TalkBack activo, las mismas acciones están en el menú de acciones.</li>
 </ul>
 <p><strong>Sin internet.</strong> El escáner, la voz y la vibración funcionan sin conexión. Los comandos de voz
@@ -202,7 +203,7 @@ gráfica de la semana. Se borran solas a los 90 días.</p>
 <h3 id="ajustes">Ajustes</h3>
 <p>Le permite cambiar:
 - la velocidad y el volumen de la voz, con una frase de ejemplo;
-- la vibración, con el botón <strong>Probar vibración</strong> para comprobar que se siente;
+- la vibración y los pitidos, con los botones <strong>Probar vibración</strong> y <strong>Probar pitidos</strong>;
 - las zonas automáticas y el radio de aviso;
 - la confianza mínima del modelo;
 - la cámara.</p>
@@ -232,9 +233,10 @@ perros, semáforos y bancas. Los postes, huecos, escalones y obras se agregan co
 ajustado con imágenes de Pasto. Mientras tanto, esos peligros se avisan con las zonas de riesgo
 registradas.</p>
 <p><strong>No siento la vibración.</strong>
-En Ajustes, toque <strong>Probar vibración</strong>. Si no siente los 3 pulsos, revise en los ajustes de
-Android que la vibración de alarmas esté activada y con buena intensidad (Sonido y vibración →
-Vibración o Intensidad de la vibración). La app usa la vibración de alarma de Android.</p>
+Algunos teléfonos, como el vivo Y22s, no vibran mientras una app usa la cámara: es una
+restricción del fabricante y la app no la puede saltar. Por eso EyeSight AI repite el mismo código
+con <strong>pitidos suaves</strong>; déjelos activados en Ajustes. Si tampoco siente la vibración con
+<strong>Probar vibración</strong> (con la cámara apagada), revise la vibración en los ajustes de Android.</p>
 <p><strong>Se me olvidó el PIN.</strong>
 Desinstale y vuelva a instalar la app. Se perderán los datos; por eso conviene exportar las zonas
 de vez en cuando.</p>
