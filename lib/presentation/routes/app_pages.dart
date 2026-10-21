@@ -168,6 +168,8 @@ abstract final class AppPages {
             pin: Get.find<PinGuard>(),
             wipe: wipeAllData,
             navigate: go,
+            zoneService: Get.find<ZoneService>(),
+            exporter: Get.find<IFileExporter>(),
           ),
         );
       }),
