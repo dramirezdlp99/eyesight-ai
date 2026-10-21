@@ -96,7 +96,7 @@ gráfica de la semana. Se borran solas a los 90 días.
 
 Le permite cambiar:
 - la velocidad y el volumen de la voz, con una frase de ejemplo;
-- la vibración;
+- la vibración, con el botón **Probar vibración** para comprobar que se siente;
 - las zonas automáticas y el radio de aviso;
 - la confianza mínima del modelo;
 - la cámara.
@@ -130,6 +130,11 @@ El modelo de esta versión reconoce objetos comunes de la calle: personas, vehí
 perros, semáforos y bancas. Los postes, huecos, escalones y obras se agregan con el modelo
 ajustado con imágenes de Pasto. Mientras tanto, esos peligros se avisan con las zonas de riesgo
 registradas.
+
+**No siento la vibración.**
+En Ajustes, toque **Probar vibración**. Si no siente los 3 pulsos, revise en los ajustes de
+Android que la vibración de alarmas esté activada y con buena intensidad (Sonido y vibración →
+Vibración o Intensidad de la vibración). La app usa la vibración de alarma de Android.
 
 **Se me olvidó el PIN.**
 Desinstale y vuelva a instalar la app. Se perderán los datos; por eso conviene exportar las zonas
