@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:eyesight_ai/core/ai/i_obstacle_detector.dart';
+import 'package:eyesight_ai/core/device/earcons.dart';
 import 'package:eyesight_ai/core/device/haptics.dart';
 import 'package:eyesight_ai/core/device/location_service.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
@@ -51,6 +52,7 @@ void main() {
       VideoSourceSelector({VideoSourceKind.phone: FakeVideoSource()}),
     );
     Get.put<IHaptics>(FakeHaptics());
+    Get.put<IEarcons>(FakeEarcons());
     Get.put<ILocationService>(FakeLocation());
     Get.put<IPermissionGuard>(
       FakePermissions()..granted.addAll(AppPermission.values),
