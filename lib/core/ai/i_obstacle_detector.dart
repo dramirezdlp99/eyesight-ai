@@ -27,6 +27,10 @@ abstract interface class IObstacleDetector {
   /// Carga y verifica el modelo. Lanza una excepción si no es posible.
   Future<void> load();
 
+  /// Hilos del procesador para el modelo. Si cambian y el modelo ya estaba
+  /// cargado, se libera para cargarlo de nuevo con el valor nuevo.
+  Future<void> setThreads(int threads);
+
   Future<FrameDetections> detect(
     CameraFrame frame, {
     required double confidenceThreshold,
