@@ -1,4 +1,5 @@
 import 'package:eyesight_ai/core/device/alert_manager.dart';
+import 'package:eyesight_ai/core/device/earcons.dart';
 import 'package:eyesight_ai/domain/entities/proximity.dart';
 import 'package:eyesight_ai/domain/usecases/alert_policy.dart';
 import 'package:eyesight_ai/domain/usecases/zone_monitor.dart';
@@ -16,12 +17,14 @@ class _FailingSpeech extends FakeSpeech {
 void main() {
   late FakeSpeech speech;
   late FakeHaptics haptics;
+  late FakeEarcons earcons;
   late AlertManager alerts;
 
   setUp(() {
     speech = FakeSpeech();
     haptics = FakeHaptics();
-    alerts = AlertManager(speech: speech, haptics: haptics);
+    earcons = FakeEarcons();
+    alerts = AlertManager(speech: speech, haptics: haptics, earcons: earcons);
   });
 
   AlertDecision decision(Proximity p) => AlertDecision(
@@ -29,6 +32,34 @@ void main() {
         message: 'Poste, ${p.spoken}, al frente',
         vibrationPattern: HapticPatterns.forProximity(p),
       );
+
+  test('los pitidos repiten el código de la vibración', () async {
+    alerts
+      ..announce(decision(Proximity.near), t0)
+      ..announce(decision(Proximity.far), t0)
+      ..confirmZone();
+    await Future<void>.delayed(Duration.zero);
+    expect(earcons.played, [Earcons.near, Earcons.far, Earcons.zone]);
+    expect(Earcons.near, hasLength(3));
+    expect(Earcons.medium, hasLength(2));
+    expect(Earcons.far, hasLength(1));
+  });
+
+  test('en silencio solo pita lo cercano y sin pitidos no suena', () async {
+    alerts
+      ..mute(t0)
+      ..announce(decision(Proximity.medium), t0)
+      ..announce(decision(Proximity.near), t0);
+    await Future<void>.delayed(Duration.zero);
+    expect(earcons.played, [Earcons.near]);
+    alerts
+      ..reset()
+      ..beeps = false
+      ..announce(decision(Proximity.near), t0);
+    await Future<void>.delayed(Duration.zero);
+    expect(earcons.played, hasLength(1));
+    expect(haptics.played, hasLength(2));
+  });
 
   test('anuncia con voz y el patrón de vibración de la cercanía (HU04)',
       () async {
