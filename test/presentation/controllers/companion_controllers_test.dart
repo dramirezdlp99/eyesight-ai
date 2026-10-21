@@ -1,3 +1,4 @@
+import 'package:eyesight_ai/core/device/earcons.dart';
 import 'package:eyesight_ai/core/device/permission_guard.dart';
 import 'package:eyesight_ai/core/device/video_source_selector.dart';
 import 'package:eyesight_ai/core/security/pin_guard.dart';
@@ -183,6 +184,7 @@ void main() {
     late FakeSpeech speech;
     late FakeVideoSource usb;
     late FakeHaptics haptics;
+    late FakeEarcons earcons;
     late SettingsController c;
 
     setUp(() async {
@@ -192,6 +194,7 @@ void main() {
       speech = FakeSpeech();
       usb = FakeVideoSource(kind: VideoSourceKind.usb, available: false);
       haptics = FakeHaptics();
+      earcons = FakeEarcons();
       c = SettingsController(
         settings: settings,
         speech: speech,
@@ -200,8 +203,21 @@ void main() {
           VideoSourceKind.usb: usb,
         }),
         haptics: haptics,
+        earcons: earcons,
       );
       await c.load();
+    });
+
+    test('pitidos: se guardan y se pueden probar', () async {
+      await c.setBeeps(false);
+      expect(settings.value.beeps, isFalse);
+      await c.testBeeps();
+      expect(earcons.played, [
+        Earcons.near,
+        Earcons.medium,
+        Earcons.far,
+        Earcons.zone,
+      ]);
     });
 
     test('probar vibración reproduce el patrón de «cerca»', () async {
