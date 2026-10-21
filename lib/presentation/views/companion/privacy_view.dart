@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/config/app_constants.dart';
@@ -115,6 +116,39 @@ class PrivacyView extends GetView<PrivacyController> {
                       'y el historial nunca se envían.',
                       style: text.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                SectionCard(
+                  title: 'Copia de seguridad de zonas',
+                  children: [
+                    Text(
+                      'Guarde sus zonas o páselas a otro teléfono sin nube: '
+                      'se comparten como un texto cifrado con una contraseña '
+                      'que usted elige.',
+                      style: text.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.ios_share),
+                      label: const Text('Exportar zonas'),
+                      onPressed: () => showDialog<void>(
+                        context: context,
+                        builder: (_) =>
+                            ExportZonesDialog(controller: controller),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.download),
+                      label: const Text('Importar zonas'),
+                      onPressed: () => showDialog<void>(
+                        context: context,
+                        builder: (_) =>
+                            ImportZonesDialog(controller: controller),
                       ),
                     ),
                   ],
@@ -306,6 +340,214 @@ class _ChangePinDialogState extends State<ChangePinDialog> {
         FilledButton(
           onPressed: _busy ? null : _submit,
           child: const Text('Cambiar'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Exportar zonas: contraseña y repetición.
+class ExportZonesDialog extends StatefulWidget {
+  const ExportZonesDialog({super.key, required this.controller});
+
+  final PrivacyController controller;
+
+  @override
+  State<ExportZonesDialog> createState() => _ExportZonesDialogState();
+}
+
+class _ExportZonesDialogState extends State<ExportZonesDialog> {
+  final _password = TextEditingController();
+  final _repeat = TextEditingController();
+  String? _error;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    _repeat.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() => _busy = true);
+    final error =
+        await widget.controller.exportZones(_password.text, _repeat.text);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _error = error;
+    });
+    if (error == null) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final error = _error;
+    return AlertDialog(
+      title: const Text('Exportar zonas'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Elija una contraseña de 6 caracteres o más. La necesitará '
+              'para importar las zonas; no se puede recuperar.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Contraseña'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _repeat,
+              obscureText: true,
+              decoration:
+                  const InputDecoration(labelText: 'Repita la contraseña'),
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    error,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _submit,
+          child: const Text('Compartir'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Importar zonas: pegar el texto de la copia y escribir la contraseña.
+class ImportZonesDialog extends StatefulWidget {
+  const ImportZonesDialog({super.key, required this.controller});
+
+  final PrivacyController controller;
+
+  @override
+  State<ImportZonesDialog> createState() => _ImportZonesDialogState();
+}
+
+class _ImportZonesDialogState extends State<ImportZonesDialog> {
+  final _text = TextEditingController();
+  final _password = TextEditingController();
+  String? _message;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _text.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final value = data?.text;
+    if (value != null && mounted) {
+      setState(() => _text.text = value);
+    }
+  }
+
+  Future<void> _submit() async {
+    setState(() => _busy = true);
+    final (ok, message) =
+        await widget.controller.importZones(_text.text, _password.text);
+    if (!mounted) {
+      return;
+    }
+    if (ok) {
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.of(context).pop();
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _message = message;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final message = _message;
+    return AlertDialog(
+      title: const Text('Importar zonas'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Copie el texto completo que empieza con EYESIGHT-ZONAS-1 y '
+              'péguelo aquí.',
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _text,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(labelText: 'Texto de la copia'),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.content_paste),
+                label: const Text('Pegar'),
+                onPressed: _paste,
+              ),
+            ),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Contraseña'),
+            ),
+            if (message != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    message,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _submit,
+          child: const Text('Importar'),
         ),
       ],
     );
