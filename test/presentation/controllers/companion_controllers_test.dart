@@ -10,6 +10,7 @@ import 'package:eyesight_ai/domain/entities/user_profile.dart';
 import 'package:eyesight_ai/domain/entities/video_source_kind.dart';
 import 'package:eyesight_ai/domain/entities/zone_audit_entry.dart';
 import 'package:eyesight_ai/domain/entities/zone_origin.dart';
+import 'package:eyesight_ai/domain/usecases/alert_policy.dart';
 import 'package:eyesight_ai/domain/usecases/zone_service.dart';
 import 'package:eyesight_ai/presentation/controllers/history_controller.dart';
 import 'package:eyesight_ai/presentation/controllers/privacy_controller.dart';
@@ -181,6 +182,7 @@ void main() {
     late InMemorySettingsRepository settings;
     late FakeSpeech speech;
     late FakeVideoSource usb;
+    late FakeHaptics haptics;
     late SettingsController c;
 
     setUp(() async {
@@ -189,6 +191,7 @@ void main() {
       );
       speech = FakeSpeech();
       usb = FakeVideoSource(kind: VideoSourceKind.usb, available: false);
+      haptics = FakeHaptics();
       c = SettingsController(
         settings: settings,
         speech: speech,
@@ -196,8 +199,14 @@ void main() {
           VideoSourceKind.phone: FakeVideoSource(),
           VideoSourceKind.usb: usb,
         }),
+        haptics: haptics,
       );
       await c.load();
+    });
+
+    test('probar vibración reproduce el patrón de «cerca»', () async {
+      await c.testVibration();
+      expect(haptics.played.single, HapticPatterns.near);
     });
 
     test('CA1: al cambiar la voz se guarda y suena una frase de ejemplo',
