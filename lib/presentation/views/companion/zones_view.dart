@@ -90,15 +90,23 @@ class ZonesView extends GetView<ZonesController> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              // Los tres filtros en una sola fila.
+              child: Row(
                 children: [
                   for (final f in ZoneFilter.values)
-                    ChoiceChip(
-                      label: Text(f.label),
-                      selected: f == filter,
-                      onSelected: (_) => controller.setFilter(f),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: ChoiceChip(
+                          showCheckmark: false,
+                          label: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(f.label, maxLines: 1),
+                          ),
+                          selected: f == filter,
+                          onSelected: (_) => controller.setFilter(f),
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -122,6 +130,10 @@ class ZonesView extends GetView<ZonesController> {
                   ),
                 ),
               ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: _Legend(),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
@@ -233,35 +245,36 @@ class _ZonesMap extends StatelessWidget {
             ),
             MarkerLayer(
               markers: [
-                for (final z in zones)
-                  Marker(
-                    point: LatLng(z.lat, z.lng),
-                    width: 48,
-                    height: 48,
-                    child: _ZoneMarker(zone: z, onTap: () => onOpen(z.id)),
-                  ),
+                // Primero «usted» (abajo) y luego las zonas, que se dibujan
+                // como pines por encima del punto exacto.
                 if (u != null)
                   Marker(
                     point: u,
-                    width: 26,
-                    height: 26,
+                    width: 22,
+                    height: 22,
                     child: Semantics(
                       label: 'Usted está aquí',
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.cobalt,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.paper, width: 4),
+                          border: Border.all(color: AppColors.paper, width: 3),
                         ),
                       ),
                     ),
                   ),
+                for (final z in zones)
+                  Marker(
+                    point: LatLng(z.lat, z.lng),
+                    width: 46,
+                    height: 52,
+                    alignment: Alignment.topCenter,
+                    child: _ZoneMarker(zone: z, onTap: () => onOpen(z.id)),
+                  ),
               ],
             ),
-            if (baseMap)
-              const SimpleAttributionWidget(
-                source: Text('OpenStreetMap'),
-              ),
+            // Crédito que exige la licencia de OpenStreetMap (ODbL).
+            if (baseMap) const _OsmCredit(),
           ],
         ),
       ),
@@ -269,6 +282,63 @@ class _ZonesMap extends StatelessWidget {
   }
 }
 
+/// Qué significa cada color del mapa.
+class _Legend extends StatelessWidget {
+  const _Legend();
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    Widget item(Color color, String label) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            Text(label, style: text.bodyMedium),
+          ],
+        );
+    return ExcludeSemantics(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 6,
+        children: [
+          item(AppColors.carmin, 'Automática'),
+          item(AppColors.esmeralda, 'Manual'),
+          item(AppColors.cobalt, 'Usted'),
+        ],
+      ),
+    );
+  }
+}
+
+class _OsmCredit extends StatelessWidget {
+  const _OsmCredit();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Container(
+        margin: const EdgeInsets.all(6),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: AppColors.paper.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          '© OpenStreetMap contributors',
+          style: TextStyle(fontSize: 11, color: AppColors.ink),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pin de una zona: su punta marca el lugar exacto.
 class _ZoneMarker extends StatelessWidget {
   const _ZoneMarker({required this.zone, required this.onTap});
 
@@ -286,19 +356,25 @@ class _ZoneMarker extends StatelessWidget {
       onTap: onTap,
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.paper, width: 3),
-          ),
-          child: Icon(
-            zone.origin == ZoneOrigin.automatic
-                ? Icons.warning_amber_rounded
-                : Icons.push_pin,
-            color: AppColors.paper,
-            size: 22,
-          ),
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            const Icon(Icons.location_on, size: 52, color: AppColors.paper),
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Icon(Icons.location_on, size: 44, color: color),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 13),
+              child: Icon(
+                zone.origin == ZoneOrigin.automatic
+                    ? Icons.warning_amber_rounded
+                    : Icons.push_pin,
+                size: 15,
+                color: AppColors.paper,
+              ),
+            ),
+          ],
         ),
       ),
     );
