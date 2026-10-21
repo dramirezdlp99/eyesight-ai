@@ -131,4 +131,14 @@ class FakeFileExporter implements IFileExporter {
     files[fileName] = contents;
     return '/tmp/$fileName';
   }
+
+  final List<String> shared = [];
+
+  @override
+  Future<void> shareText(String text, {String? subject}) async {
+    if (fail) {
+      throw StateError('sin espacio');
+    }
+    shared.add(text);
+  }
 }
