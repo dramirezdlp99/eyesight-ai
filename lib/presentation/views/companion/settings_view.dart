@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -111,6 +113,17 @@ class SettingsView extends GetView<SettingsController> {
                       subtitle: const Text('Pulsos según la cercanía'),
                       value: s.vibration,
                       onChanged: controller.setVibration,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.vibration),
+                        label: const Text('Probar vibración'),
+                        onPressed: () {
+                          unawaited(controller.testVibration());
+                          showNotice(context, SettingsController.vibrationTest);
+                        },
+                      ),
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
