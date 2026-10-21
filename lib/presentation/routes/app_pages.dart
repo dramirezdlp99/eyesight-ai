@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../core/ai/i_obstacle_detector.dart';
+import '../../core/device/earcons.dart';
 import '../../core/device/file_exporter.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/location_service.dart';
@@ -133,6 +134,7 @@ abstract final class AppPages {
             speech: Get.find<ISpeechService>(),
             voice: Get.find<IVoiceInput>(),
             haptics: Get.find<IHaptics>(),
+            earcons: Get.find<IEarcons>(),
             location: Get.find<ILocationService>(),
             permissions: Get.find<IPermissionGuard>(),
             wakelock: Get.find<IWakelock>(),
@@ -158,6 +160,7 @@ abstract final class AppPages {
             speech: Get.find<ISpeechService>(),
             sources: Get.find<VideoSourceSelector>(),
             haptics: Get.find<IHaptics>(),
+            earcons: Get.find<IEarcons>(),
           ),
         );
         Get.lazyPut<PrivacyController>(
@@ -191,6 +194,7 @@ abstract final class AppPages {
             settings: Get.find<ISettingsRepository>(),
             speech: Get.find<ISpeechService>(),
             haptics: Get.find<IHaptics>(),
+            earcons: Get.find<IEarcons>(),
             location: Get.find<ILocationService>(),
             permissions: Get.find<IPermissionGuard>(),
             wakelock: Get.find<IWakelock>(),
