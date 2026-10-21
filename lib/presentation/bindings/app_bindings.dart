@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../core/ai/i_obstacle_detector.dart';
 import '../../core/ai/yolo_litert_detector.dart';
+import '../../core/device/earcons.dart';
 import '../../core/device/file_exporter.dart';
 import '../../core/device/haptics.dart';
 import '../../core/device/location_service.dart';
@@ -60,6 +61,7 @@ abstract final class AppBindings {
     Get.lazyPut<ISpeechService>(FlutterTtsSpeechService.new, fenix: true);
     Get.lazyPut<IVoiceInput>(SpeechToTextVoiceInput.new, fenix: true);
     Get.lazyPut<IHaptics>(VibrationHaptics.new, fenix: true);
+    Get.lazyPut<IEarcons>(NativeEarcons.new, fenix: true);
     Get.lazyPut<ILocationService>(GeolocatorLocationService.new, fenix: true);
     Get.lazyPut<IPermissionGuard>(PermissionHandlerGuard.new, fenix: true);
     Get.lazyPut<IWakelock>(WakelockPlusService.new, fenix: true);
