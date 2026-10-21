@@ -1,10 +1,14 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/ai/obstacle_catalog.dart';
 import '../../../core/config/app_constants.dart';
+import '../../../core/device/haptics.dart';
+import '../../../core/device/native_vibrator.dart';
 import '../../../core/device/phone_camera_source.dart';
+import '../../../domain/usecases/alert_policy.dart';
 import '../../controllers/test_mode_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/companion_ui.dart';
@@ -157,6 +161,7 @@ class TestModeView extends GetView<TestModeController> {
                     ],
                   ),
                   if (running) _Preview(controller: controller),
+                  if (running) const VibrationProbe(),
                   Row(
                     children: [
                       Expanded(
@@ -352,4 +357,74 @@ class InferenceChartPainter extends CustomPainter {
       (values.isNotEmpty && old.values.last != values.last) ||
       old.goal != goal ||
       old.line != line;
+}
+
+/// Diagnóstico: prueba cada forma de vibrar mientras la cámara está activa,
+/// porque algunos teléfonos bloquean la vibración con la cámara encendida.
+class VibrationProbe extends StatelessWidget {
+  const VibrationProbe({super.key});
+
+  Future<void> _run(BuildContext context, String name,
+      Future<Object?> Function() action) async {
+    String result;
+    try {
+      final ok = await action();
+      result = ok == false
+          ? '$name: Android la rechazó.'
+          : '$name: enviada. ¿La sintió?';
+    } on Object catch (e) {
+      result = '$name: error ($e).';
+    }
+    if (context.mounted) {
+      showNotice(context, result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const pattern = HapticPatterns.near;
+    const vibrator = NativeVibrator();
+    final options = <(String, Future<Object?> Function())>[
+      (
+        'A · Actual',
+        () async {
+          await VibrationHaptics().play(pattern);
+          return null;
+        }
+      ),
+      for (final (i, u) in VibrationUsage.values.indexed)
+        (
+          '${String.fromCharCode(66 + i)} · ${u.label}',
+          () => vibrator.vibrate(pattern, u),
+        ),
+      (
+        'G · Toque fuerte',
+        () async {
+          await HapticFeedback.heavyImpact();
+          return null;
+        }
+      ),
+    ];
+    return SectionCard(
+      title: 'Vibración con la cámara encendida',
+      children: [
+        Text(
+          'Toque cada botón y anote cuáles se sienten.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (name, action) in options)
+              OutlinedButton(
+                onPressed: () => _run(context, name, action),
+                child: Text(name),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
 }
