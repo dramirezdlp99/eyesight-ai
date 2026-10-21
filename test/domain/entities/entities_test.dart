@@ -125,6 +125,8 @@ void main() {
         videoSource: VideoSourceKind.usb,
         vibration: false,
         autoZones: false,
+        beeps: false,
+        inferenceThreads: 2,
       );
       expect(AppSettings.fromMap(s.toMap()), s);
     });
