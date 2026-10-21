@@ -13,6 +13,7 @@ class AppSettings {
     this.videoSource = VideoSourceKind.phone,
     this.vibration = true,
     this.autoZones = true,
+    this.beeps = true,
     this.inferenceThreads = AppConstants.defaultInferenceThreads,
   });
 
@@ -49,6 +50,7 @@ class AppSettings {
               d.videoSource,
       vibration: map['vibration'] is bool ? map['vibration'] as bool : true,
       autoZones: map['autoZones'] is bool ? map['autoZones'] as bool : true,
+      beeps: map['beeps'] is bool ? map['beeps'] as bool : true,
       inferenceThreads:
           AppConstants.inferenceThreadOptions.contains(map['inferenceThreads'])
               ? map['inferenceThreads'] as int
@@ -68,6 +70,9 @@ class AppSettings {
   final bool vibration;
   final bool autoZones;
 
+  /// Pitidos suaves con cada alerta, además de la vibración (HU04).
+  final bool beeps;
+
   /// Hilos del procesador para el modelo; se elige en el modo de pruebas
   /// midiendo cuál es más rápido en el teléfono (RNF01).
   final int inferenceThreads;
@@ -82,6 +87,7 @@ class AppSettings {
     VideoSourceKind? videoSource,
     bool? vibration,
     bool? autoZones,
+    bool? beeps,
     int? inferenceThreads,
   }) =>
       AppSettings(
@@ -93,6 +99,7 @@ class AppSettings {
         videoSource: videoSource ?? this.videoSource,
         vibration: vibration ?? this.vibration,
         autoZones: autoZones ?? this.autoZones,
+        beeps: beeps ?? this.beeps,
         inferenceThreads: inferenceThreads ?? this.inferenceThreads,
       );
 
@@ -108,6 +115,7 @@ class AppSettings {
         'videoSource': videoSource.name,
         'vibration': vibration,
         'autoZones': autoZones,
+        'beeps': beeps,
         'inferenceThreads': inferenceThreads,
       };
 
@@ -132,6 +140,7 @@ class AppSettings {
       other.videoSource == videoSource &&
       other.vibration == vibration &&
       other.autoZones == autoZones &&
+      other.beeps == beeps &&
       other.inferenceThreads == inferenceThreads;
 
   @override
@@ -144,6 +153,7 @@ class AppSettings {
         videoSource,
         vibration,
         autoZones,
+        beeps,
         inferenceThreads,
       );
 }
