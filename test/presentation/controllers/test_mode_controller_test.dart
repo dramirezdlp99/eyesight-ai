@@ -18,6 +18,7 @@ void main() {
   late FakePermissions permissions;
   late FakeWakelock wakelock;
   late FakeFileExporter exporter;
+  late InMemorySettingsRepository settings;
   late DateTime now;
   late TestModeController c;
 
@@ -30,11 +31,12 @@ void main() {
     permissions = FakePermissions()..granted.addAll(AppPermission.values);
     wakelock = FakeWakelock();
     exporter = FakeFileExporter();
+    settings = InMemorySettingsRepository();
     now = t0;
     c = TestModeController(
       detector: detector,
       sources: VideoSourceSelector({VideoSourceKind.phone: camera}),
-      settings: InMemorySettingsRepository(),
+      settings: settings,
       speech: speech,
       haptics: haptics,
       location: location,
@@ -121,6 +123,22 @@ void main() {
     await c.start();
     expect(c.state.value, TestState.failed);
     expect(c.error.value, contains('cámara'));
+  });
+
+  test('los hilos elegidos se guardan, los usa el modelo y van al CSV',
+      () async {
+    await c.loadThreads();
+    expect(c.threads.value, 4);
+    await c.setThreads(2);
+    expect(settings.value.inferenceThreads, 2);
+    await c.setThreads(3); // no es una opción válida
+    expect(c.threads.value, 2);
+    await c.start();
+    expect(detector.threads, 2);
+    await frames(1);
+    expect(c.logger.samples.single.threads, 2);
+    await c.setThreads(6); // no cambia mientras mide
+    expect(c.threads.value, 2);
   });
 
   test('borrar mediciones', () async {
