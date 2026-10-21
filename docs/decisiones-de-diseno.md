@@ -18,6 +18,7 @@ y para la sustentación.
 | 10 | Rendimiento: modelo INT8 e hilos configurables | Aceptada |
 | 11 | Reconocimiento de voz del sistema con respaldo en botones y gestos | Aceptada |
 | 12 | Levantamiento de requisitos por revisión documental y validación posterior con usuarios | Aceptada |
+| 13 | Pitidos suaves como respaldo de la vibración | Aceptada |
 
 ---
 
@@ -243,3 +244,29 @@ Los requisitos (HU01 a HU15, RF y RNF) se derivaron de cuatro fuentes:
 Se validan con usuarios y personal de la Fundación Nueva Luz con el prototipo funcional (ver
 `docs/kit-validacion.md`). Los comentarios se clasifican como crítico, mejora pequeña, trabajo
 futuro o ya cubierto, y se reportan con su decisión.
+
+## ADR-13. Pitidos suaves como respaldo de la vibración
+
+**Contexto.** En el vivo Y22s, el fabricante bloquea toda vibración mientras una app usa la cámara
+(ver `docs/resultados-pruebas.md`, «Hallazgo: vibración bloqueada por la cámara»). El escáner
+siempre tiene la cámara encendida, así que la vibración de HU04 no llega al usuario en ese
+teléfono.
+
+**Alternativas evaluadas:**
+- Apagar la cámara un instante para vibrar: se pierden cuadros y la cámara tarda en volver; pone
+  en riesgo la detección.
+- Otros tipos de vibración de Android (alarma, notificación, accesibilidad, táctil, multimedia):
+  probados, todos bloqueados.
+- **Pitidos con el mismo código que la vibración:** el sonido no se bloquea, funciona con
+  audífonos y no requiere hardware extra.
+
+**Decisión.** Pitidos suaves generados en el teléfono (ondas seno de 70 a 220 ms con entrada y
+salida graduales para evitar chasquidos), sin plugins nuevos, por un canal nativo propio
+(`eyesight/tones` en `MainActivity.kt`). Son más agudos cuanto más cerca está el obstáculo. Se
+reproducen con el uso de «guía de navegación» de Android, que sigue el volumen multimedia como la
+voz. Activados por defecto; se apagan en Ajustes.
+
+**Consecuencias.** El usuario conserva un canal no verbal en cualquier teléfono. En los teléfonos
+que sí vibran con la cámara activa, ambos canales se refuerzan. Si los pitidos resultan molestos en
+la validación con usuarios, se pueden apagar o ajustar su volumen.
+
