@@ -281,6 +281,7 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
       return;
     }
     try {
+      await _detector.setThreads(_config.inferenceThreads);
       await _detector.load();
     } on Object {
       _fail('El modelo no se pudo cargar');
