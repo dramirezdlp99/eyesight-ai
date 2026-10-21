@@ -5,7 +5,7 @@ description: >-
   en el teléfono, funcionamiento sin conectividad y memoria georreferenciada
   de zonas de riesgo.
 publish_to: none
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ^3.6.0
