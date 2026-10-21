@@ -53,6 +53,7 @@ RiskZone zone({
   int count = 1,
   DateTime? created,
   DateTime? lastSeen,
+  String note = '',
 }) =>
     RiskZone(
       id: id,
@@ -64,6 +65,7 @@ RiskZone zone({
       count: count,
       createdAt: created ?? t0,
       lastSeenAt: lastSeen ?? created ?? t0,
+      note: note,
     );
 
 /// Generador de identificadores predecible para las pruebas.
