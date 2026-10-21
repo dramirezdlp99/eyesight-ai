@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual de usuario · EyeSight AI</title>
+  <meta name="description" content="Cómo instalar y usar EyeSight AI: perfiles, alertas, comandos de voz, gestos y perfil de acompañante.">
+  <meta name="theme-color" content="#2340D9">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="tailwind.css">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <!-- Generado desde docs/manual-de-usuario.md. Si cambia el texto, edite ese archivo y regenere esta página. -->
+  <header class="bg-cobalt text-paper">
+    <nav class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4" aria-label="Principal">
+      <a href="./" class="flex items-center gap-3 font-display text-2xl">
+        <img src="img/logo-192.png" alt="" width="44" height="44" class="rounded-xl">
+        EyeSight AI
+      </a>
+      <ul class="flex flex-wrap gap-x-5 gap-y-1 text-base font-bold"><li><a class="hover:underline underline-offset-4" aria-current="page" href="manual.html">Manual</a></li><li><a class="hover:underline underline-offset-4" href="privacidad.html">Privacidad</a></li><li><a class="hover:underline underline-offset-4" href="https://github.com/dramirezdlp99/eyesight-ai">Código</a></li></ul>
+    </nav>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+      <h1 class="font-display text-4xl sm:text-5xl leading-tight">Manual de usuario de EyeSight AI</h1>
+    </div>
+    <div class="greca" role="presentation"></div>
+  </header>
+  <main id="contenido" class="max-w-4xl mx-auto px-4 sm:px-6 py-10 prose-es">
+<p>Versión 1.0.0 · Android 8.0 o superior</p>
+<p>EyeSight AI avisa con voz y vibración los obstáculos que tiene al frente: personas, vehículos,
+bicicletas, bancas, semáforos y otros. También le avisa cuando se acerca a zonas de riesgo que usted o su
+acompañante registraron.</p>
+<div class="note mb-6">
+<p><strong>Importante.</strong> EyeSight AI complementa el bastón y el perro guía; no los reemplaza. Úsela
+siempre junto con sus ayudas de movilidad habituales.</p>
+</div>
+<hr />
+<h2 id="1-instalacion">1. Instalación</h2>
+<ol>
+<li>Descargue el archivo <code>EyeSight-AI.apk</code> desde la página del proyecto:
+   <a href="https://dramirezdlp99.github.io/eyesight-ai/">https://dramirezdlp99.github.io/eyesight-ai/</a>.</li>
+<li>Ábralo. Si Android lo pide, permita «Instalar aplicaciones desconocidas» para el navegador o
+   el gestor de archivos.</li>
+<li>Toque <strong>Instalar</strong> y luego <strong>Abrir</strong>.</li>
+</ol>
+<p>La app pide tres permisos, y cada uno tiene una razón:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Permiso</th>
+<th>Para qué se usa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cámara</td>
+<td>Ver los obstáculos. Las imágenes se analizan en el teléfono y no se guardan.</td>
+</tr>
+<tr>
+<td>Micrófono</td>
+<td>Escuchar los comandos de voz.</td>
+</tr>
+<tr>
+<td>Ubicación</td>
+<td>Avisar las zonas de riesgo y guardar las nuevas. La ubicación no sale del teléfono.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="2-elegir-el-perfil">2. Elegir el perfil</h2>
+<p>La primera vez, la app anuncia los perfiles en voz alta. Puede decir el nombre del perfil o tocar
+la tarjeta correspondiente:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Perfil</th>
+<th>Para quién</th>
+<th>Cómo se controla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ceguera total</strong></td>
+<td>Personas que no ven</td>
+<td>Voz y gestos en toda la pantalla</td>
+</tr>
+<tr>
+<td><strong>Baja visión</strong></td>
+<td>Personas con resto visual</td>
+<td>Botones grandes en alto contraste (amarillo y blanco sobre negro)</td>
+</tr>
+<tr>
+<td><strong>Acompañante</strong></td>
+<td>Familiar o cuidador</td>
+<td>Mapa, historial, ajustes y privacidad, protegidos con PIN</td>
+</tr>
+</tbody>
+</table></div>
+<p>La app recuerda el perfil. Para cambiarlo, termine el escáner y toque <strong>Cambiar de perfil</strong> en el
+resumen, o use <strong>Cambiar de perfil</strong> en el mapa del acompañante.</p>
+<h2 id="3-uso-del-escaner">3. Uso del escáner</h2>
+<p>Sostenga el teléfono a la altura del pecho, con la cámara trasera mirando hacia adelante. Puede
+usar un soporte o un cordón. El escáner arranca solo y dice «Escáner activo».</p>
+<h3 id="que-significan-los-avisos">Qué significan los avisos</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Cercanía</th>
+<th>Voz</th>
+<th>Vibración</th>
+<th>Color en pantalla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cerca</td>
+<td>«Poste, cerca, al frente»</td>
+<td>3 pulsos fuertes</td>
+<td>Rojo</td>
+</tr>
+<tr>
+<td>Media distancia</td>
+<td>«Persona, a media distancia, a la izquierda»</td>
+<td>2 pulsos</td>
+<td>Amarillo</td>
+</tr>
+<tr>
+<td>Lejos</td>
+<td>«Banca, lejos, a la derecha»</td>
+<td>1 pulso</td>
+<td>Gris</td>
+</tr>
+<tr>
+<td>Zona de riesgo</td>
+<td>«Atención: hueco a 15 metros»</td>
+<td>1 pulso largo</td>
+<td>Ondas</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="comandos">Comandos</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Diga</th>
+<th>Gesto (ceguera total)</th>
+<th>Botón (baja visión)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repetir la última alerta</td>
+<td>«repetir»</td>
+<td>Doble toque</td>
+<td>Repetir</td>
+</tr>
+<tr>
+<td>Silenciar la voz 10 segundos</td>
+<td>«silencio»</td>
+<td>Deslizar a un lado</td>
+<td>Silenciar</td>
+</tr>
+<tr>
+<td>Marcar una zona de riesgo aquí</td>
+<td>«marcar zona»</td>
+<td>Mantener presionado 2 segundos</td>
+<td>Marcar zona</td>
+</tr>
+<tr>
+<td>Terminar</td>
+<td>«terminar» y luego «sí»</td>
+<td>—</td>
+<td>Terminar</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Mientras la voz está en silencio, los obstáculos cercanos siguen vibrando.</li>
+<li>Con TalkBack activo, las mismas acciones están en el menú de acciones.</li>
+</ul>
+<p><strong>Sin internet.</strong> El escáner, la voz y la vibración funcionan sin conexión. Los comandos de voz
+necesitan el <strong>paquete de español sin conexión</strong> de Google. Para instalarlo, vaya a Ajustes de
+Android → Sistema → Idioma → Reconocimiento de voz → Idiomas sin conexión → Español. Si no está
+instalado, la app lo anuncia y usted sigue usando gestos o botones.</p>
+<h2 id="4-perfil-de-acompanante">4. Perfil de acompañante</h2>
+<p>La primera vez, cree un PIN de 4 a 6 dígitos. Si se equivoca 5 veces, la app espera 60 segundos
+antes de dejarle intentar otra vez.</p>
+<h3 id="mapa">Mapa</h3>
+<ul>
+<li>Muestra las zonas de riesgo en un mapa de OpenStreetMap y en una lista:</li>
+<li><strong>pin rojo:</strong> zona automática, registrada por la app al detectar un obstáculo fijo cercano;</li>
+<li><strong>pin verde:</strong> zona manual, marcada por el usuario o por usted;</li>
+<li><strong>punto azul:</strong> su ubicación.</li>
+<li>Filtre la lista con <strong>Todas</strong>, <strong>Automáticas</strong> o <strong>Manuales</strong>.</li>
+<li>Toque una zona para cambiar su tipo, su radio de aviso o su nota, o para eliminarla.</li>
+<li>Sin internet, el plano no carga, pero la lista sí.</li>
+</ul>
+<h3 id="historial">Historial</h3>
+<p>Muestra las alertas de hoy, de los últimos 7 o 30 días, o todas, filtradas por tipo, con la
+gráfica de la semana. Se borran solas a los 90 días.</p>
+<h3 id="ajustes">Ajustes</h3>
+<p>Le permite cambiar:
+- la velocidad y el volumen de la voz, con una frase de ejemplo;
+- la vibración;
+- las zonas automáticas y el radio de aviso;
+- la confianza mínima del modelo;
+- la cámara.</p>
+<p>También da acceso al modo de pruebas.</p>
+<h3 id="privacidad">Privacidad</h3>
+<ul>
+<li><strong>Datos guardados y permisos:</strong> cuántas zonas y alertas hay, y qué permisos están activos.</li>
+<li><strong>Cambiar PIN.</strong></li>
+<li><strong>Copia de seguridad de zonas:</strong></li>
+<li><strong>Exportar zonas:</strong> elija una contraseña de 6 caracteres o más. La app genera un texto
+    cifrado y abre el menú de compartir (WhatsApp, correo o notas). Sin la contraseña, nadie
+    puede leer ese texto.</li>
+<li><strong>Importar zonas:</strong> copie el texto completo, toque <strong>Pegar</strong>, escriba la contraseña e
+    importe. Las zonas que ya existen no se duplican.</li>
+<li><strong>Borrar todo:</strong> escriba <strong>ELIMINAR</strong> para borrar zonas, historial, ajustes y PIN. Esto no se
+  puede deshacer.</li>
+</ul>
+<h2 id="5-preguntas-frecuentes">5. Preguntas frecuentes</h2>
+<p><strong>¿La app envía mis datos a internet?</strong>
+No. Todo se guarda cifrado en el teléfono. Solo el plano del mapa se descarga de OpenStreetMap.</p>
+<p><strong>¿Cuánta batería gasta?</strong>
+La cámara y el modelo trabajan todo el tiempo, así que el consumo es parecido al de grabar video.
+Termine el escáner cuando no lo use.</p>
+<p><strong>¿Detecta huecos y escaleras?</strong>
+El modelo de esta versión reconoce objetos comunes de la calle: personas, vehículos, bicicletas,
+perros, semáforos y bancas. Los postes, huecos, escalones y obras se agregan con el modelo
+ajustado con imágenes de Pasto. Mientras tanto, esos peligros se avisan con las zonas de riesgo
+registradas.</p>
+<p><strong>Se me olvidó el PIN.</strong>
+Desinstale y vuelva a instalar la app. Se perderán los datos; por eso conviene exportar las zonas
+de vez en cuando.</p>
+<h2 id="6-contacto">6. Contacto</h2>
+<p>Autor: David Fernando Ramírez de la Parra. Universidad Cooperativa de Colombia, sede Pasto.
+Proyecto: <a href="https://github.com/dramirezdlp99/eyesight-ai">https://github.com/dramirezdlp99/eyesight-ai</a></p>
+  </main>
+  <footer class="bg-ink text-paper">
+    <div class="greca" role="presentation"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex flex-wrap gap-4 justify-between text-base">
+      <p>© 2026 EyeSight AI · Pasto, Colombia</p>
+      <p><a class="underline underline-offset-4" href="./">Inicio</a> ·
+        <a class="underline underline-offset-4" href="privacidad.html">Privacidad</a> ·
+        <a class="underline underline-offset-4" href="manual.html">Manual</a></p>
+    </div>
+  </footer>
+</body>
+</html>
