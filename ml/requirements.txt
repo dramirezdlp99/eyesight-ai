@@ -3,6 +3,6 @@ ultralytics>=8.3,<9
 pyyaml>=6
 numpy>=1.24
 # Extracción de cuadros de los videos grabados en Pasto
-opencv-python-headless>=4.8
+opencv-python-headless>=4.8,<5  # OpenCV 5 ya no trae CascadeClassifier (difuminar caras)
 # Pruebas de los módulos propios
 pytest>=8
