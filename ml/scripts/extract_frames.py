@@ -13,6 +13,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import glob
 import sys
 from pathlib import Path
 
@@ -77,6 +78,24 @@ def extract(cv2, video: Path, args, detector) -> tuple[int, int]:
     return saved, blurry
 
 
+def expand_videos(patterns: list[Path]) -> list[Path]:
+    """Expande comodines como ``videos/barrio-*.mp4``.
+
+    PowerShell no los expande al llamar a Python, así que lo hace el script.
+    """
+    videos: list[Path] = []
+    for pattern in patterns:
+        text = str(pattern)
+        if any(c in text for c in "*?["):
+            matches = sorted(Path(p) for p in glob.glob(text))
+            if not matches:
+                print(f"  Ningún video coincide con {text}")
+            videos.extend(matches)
+        else:
+            videos.append(pattern)
+    return videos
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--videos", nargs="+", type=Path, required=True)
@@ -105,7 +124,7 @@ def main() -> None:
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
         )
     total_saved = total_blurry = 0
-    for video in args.videos:
+    for video in expand_videos(args.videos):
         saved, blurry = extract(cv2, video, args, detector)
         print(f"{video.name}: {saved} cuadros guardados, {blurry} descartados por movidos")
         total_saved += saved
