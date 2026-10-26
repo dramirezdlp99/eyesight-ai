@@ -107,7 +107,7 @@ Una sola vez, en PowerShell:
 cd C:\dev\eyesight-ai\ml
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install opencv-python-headless numpy
+pip install "opencv-python-headless<5" numpy
 ```
 
 Copie los videos del teléfono a `C:\dev\eyesight-ai\ml\videos\`. Luego extraiga **cada sector en
