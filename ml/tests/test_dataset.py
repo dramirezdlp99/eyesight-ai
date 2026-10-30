@@ -88,3 +88,45 @@ def test_une_fuentes_y_escribe_eyesight_yaml(tmp_path):
     data = yaml.safe_load((out / "eyesight.yaml").read_text(encoding="utf-8"))
     assert data["names"][class_id("pothole")] == "pothole"
     assert data["test"] == "test/images"
+
+
+def test_grupo_de_video_de_un_cuadro_de_roboflow():
+    from eyesight_ml.dataset import frame_group
+
+    assert frame_group("barrio_barrio-1_s00033_jpg.rf.abc123.jpg") == "barrio_barrio-1"
+    assert frame_group("sector_sector-11_s00055.jpg") == "sector_sector-11"
+    assert frame_group("000000000139.jpg") is None
+
+
+def test_validacion_por_video_completo_y_al_menos_uno():
+    from eyesight_ml.dataset import choose_val_groups
+
+    groups = {f"barrio_barrio-{i}" for i in range(1, 18)}
+    val = choose_val_groups(groups)
+    assert len(val) == 3  # 15 % de 17, hacia arriba
+    assert val == choose_val_groups(groups)  # determinista
+    assert choose_val_groups({"solo_uno"}) == {"solo_uno"}
+    assert choose_val_groups(set()) == set()
+
+
+def test_union_con_particion_por_video(tmp_path):
+    import yaml
+
+    from eyesight_ml.dataset import merge_sources
+
+    src = tmp_path / "pasto"
+    (src / "train" / "images").mkdir(parents=True)
+    (src / "train" / "labels").mkdir(parents=True)
+    (src / "data.yaml").write_text(yaml.safe_dump({"names": ["pole"]}), encoding="utf-8")
+    for video in range(1, 8):
+        for second in range(3):
+            stem = f"barrio_barrio-{video}_s{second:05d}_jpg.rf.x{second}"
+            (src / "train" / "images" / f"{stem}.jpg").write_bytes(b"x")
+            (src / "train" / "labels" / f"{stem}.txt").write_text("0 0.5 0.5 0.2 0.2\n", encoding="utf-8")
+    out = tmp_path / "out"
+    report = merge_sources([src], out, group_split=True)
+    assert report.images["test"] == 0
+    assert report.images["val"] == 6  # dos videos completos (15 % de 7, hacia arriba)
+    val_videos = {p.name.split("_s0")[0] for p in (out / "val" / "images").iterdir()}
+    train_videos = {p.name.split("_s0")[0] for p in (out / "train" / "images").iterdir()}
+    assert len(val_videos) == 2 and not (val_videos & train_videos)
