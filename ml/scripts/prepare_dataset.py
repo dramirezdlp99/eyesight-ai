@@ -24,12 +24,20 @@ def main() -> None:
         action="store_true",
         help="ignora las particiones de las fuentes y reparte 70/15/15",
     )
+    parser.add_argument(
+        "--group-split",
+        action="store_true",
+        help="reparte los cuadros de video por video completo (85/15), sin mezclar un "
+        "mismo video entre entrenamiento y validación",
+    )
     args = parser.parse_args()
 
     sources = [s for s in args.sources if (s / "data.yaml").exists()]
     if not sources:
         raise SystemExit("No encontré carpetas con data.yaml en --sources")
-    report = merge_sources(sources, args.output, keep_splits=not args.resplit)
+    report = merge_sources(
+        sources, args.output, keep_splits=not args.resplit, group_split=args.group_split
+    )
     print(f"Imágenes por partición: {report.images}")
     print("Cajas por clase:")
     for name, count in report.boxes_per_class.items():
