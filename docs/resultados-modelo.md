@@ -48,11 +48,39 @@ Hidrante de pie: `bollard`. Barandas: sin etiqueta.
 - **Olvido catastrófico de las clases comunes**, a pesar del subconjunto de COCO. El ajuste con
   pocos datos desplaza los pesos.
 
-## Experimento 2
+## Experimento 2 · 30 de octubre de 2026
 
-**Cambios:**
+**Cambios frente al experimento 1:**
 - 480 px;
 - hasta 150 épocas con paciencia de 40;
-- **validación por video completo**: 15 % de los videos, sin mezclar cuadros de un mismo video.
+- **validación por video completo**: el 15 % de los videos de Pasto, sin mezclar cuadros de un
+  mismo video.
+
+**Resultados en la prueba de Pasto** (umbral 0,5):
+
+| Clase | AP@0,5 exp. 1 | AP@0,5 exp. 2 |
+|---|---|---|
+| step | 0,391 | 0,256 |
+| pole | 0,253 | 0,249 |
+| bollard | 0,235 | 0,037 |
+| pothole | 0,040 | 0,032 |
+| person | 0,473 | 0,630 |
+| car | 0,472 | 0,543 |
+| motorcycle | 0,348 | 0,496 |
+
+**Hipótesis (clases comunes):** diferencia de −0,028, con IC 95 % de [−0,122; 0,039]. Ya no hay
+pérdida significativa frente al modelo base, porque el olvido de las clases comunes se redujo.
+
+**Análisis:** la **mejor época fue la 1**, según la métrica de Ultralytics
+(0,1·mAP50 + 0,9·mAP50-95). La validación mezclaba los videos de Pasto con unas 75 imágenes de
+COCO, y en la época 1 el modelo todavía es casi el de COCO, así que puntúa alto ahí. El modelo
+guardado casi no había aprendido las clases nuevas: por eso subieron las comunes y bajaron las
+nuevas. Es un error de **selección de modelo**, no de aprendizaje.
+
+## Experimento 3
+
+**Cambio único frente al experimento 2:** la validación tiene **solo videos de Pasto**. COCO queda
+85 % en entrenamiento y 15 % en prueba, para medir el olvido. Así la mejor época se elige por las
+clases nuevas, en sectores no vistos.
 
 **Resultados:** pendientes.
