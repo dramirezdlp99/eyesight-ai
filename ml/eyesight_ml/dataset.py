@@ -9,6 +9,8 @@ conjunto con particiones de entrenamiento, validación y prueba.
 from __future__ import annotations
 
 import hashlib
+import math
+import re
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -90,6 +92,30 @@ def split_for(key: str, val_ratio: float = 0.15, test_ratio: float = 0.15) -> st
     return "train"
 
 
+# Cuadros extraídos de los videos: «lugar_video_s00012…». Roboflow conserva
+# ese inicio y le agrega «_jpg.rf.<hash>».
+_FRAME_GROUP = re.compile(r"^(?P<group>.+?)_s\d{5}")
+
+
+def frame_group(file_name: str) -> str | None:
+    """Video de origen de un cuadro (``barrio_barrio-1``) o None."""
+    match = _FRAME_GROUP.match(file_name)
+    return match.group("group") if match else None
+
+
+def choose_val_groups(groups: set[str], val_ratio: float = 0.15) -> set[str]:
+    """Videos completos para validación: los de hash más bajo, al menos uno.
+
+    Separar por video evita que cuadros casi iguales del mismo video queden en
+    entrenamiento y validación a la vez, lo que infla la validación.
+    """
+    if not groups:
+        return set()
+    ordered = sorted(groups, key=lambda g: hashlib.sha256(g.encode("utf-8")).hexdigest())
+    count = max(1, math.ceil(len(ordered) * val_ratio))
+    return set(ordered[:count])
+
+
 def _find_split_dirs(source: Path) -> list[tuple[str | None, Path]]:
     """Carpetas de imágenes de la fuente con su partición, si la declara."""
     found: list[tuple[str | None, Path]] = []
@@ -102,9 +128,28 @@ def _find_split_dirs(source: Path) -> list[tuple[str | None, Path]]:
     return found
 
 
-def merge_sources(sources: list[Path], output: Path, keep_splits: bool = True) -> MergeReport:
-    """Une las fuentes en `output` (formato YOLO) y escribe `eyesight.yaml`."""
+def merge_sources(
+    sources: list[Path],
+    output: Path,
+    keep_splits: bool = True,
+    group_split: bool = False,
+) -> MergeReport:
+    """Une las fuentes en `output` (formato YOLO) y escribe `eyesight.yaml`.
+
+    Con ``group_split``, los cuadros de video (de Pasto) se reparten por video
+    completo: 85 % de los videos para entrenamiento y 15 % para validación.
+    Las demás imágenes conservan su partición."""
     report = MergeReport()
+    val_groups: set[str] = set()
+    if group_split:
+        groups = {
+            g
+            for source in sources
+            for _, images_dir in _find_split_dirs(source)
+            for image in images_dir.iterdir()
+            if (g := frame_group(image.name)) is not None
+        }
+        val_groups = choose_val_groups(groups)
     for split in SPLITS:
         (output / split / "images").mkdir(parents=True, exist_ok=True)
         (output / split / "labels").mkdir(parents=True, exist_ok=True)
@@ -126,7 +171,11 @@ def merge_sources(sources: list[Path], output: Path, keep_splits: bool = True) -
                     report.skipped_images += 1
                     continue
                 name = f"{prefix}__{image.name}"
-                split = declared if (keep_splits and declared) else split_for(name)
+                group = frame_group(image.name) if group_split else None
+                if group is not None:
+                    split = "val" if group in val_groups else "train"
+                else:
+                    split = declared if (keep_splits and declared) else split_for(name)
                 shutil.copy2(image, output / split / "images" / name)
                 (output / split / "labels" / f"{Path(name).stem}.txt").write_text(
                     "\n".join(lines) + ("\n" if lines else ""), encoding="utf-8"
