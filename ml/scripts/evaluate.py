@@ -89,6 +89,11 @@ def predict(model_path: str, images: list[Path], imgsz: int, coco: bool) -> list
     preds: list[Prediction] = []
     for img in images:
         result = model.predict(str(img), imgsz=imgsz, conf=0.001, verbose=False)[0]
+        if not coco and len(result.names) != len(EYESIGHT_CLASSES):
+            raise SystemExit(
+                f"{model_path} tiene {len(result.names)} clases y no las "
+                f"{len(EYESIGHT_CLASSES)} de EyeSight AI: no es el modelo ajustado."
+            )
         for box, cls, score in zip(
             result.boxes.xyxyn.tolist(), result.boxes.cls.tolist(), result.boxes.conf.tolist()
         ):
