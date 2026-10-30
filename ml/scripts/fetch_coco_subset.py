@@ -57,10 +57,12 @@ def main() -> None:
     chosen = select_images(coco["annotations"], images, per_class=args.per_class)
     print(f"Imágenes elegidas: {len(chosen)}")
 
-    # Partición 70/15/15: la parte de prueba sirve para comprobar que el
-    # modelo ajustado no olvidó las clases comunes.
-    counts = {"train": 0, "val": 0, "test": 0}
-    folders = {"train": "train", "val": "valid", "test": "test"}
+    # Partición 85/0/15. La validación queda solo con videos de Pasto, para que
+    # la elección de la mejor época dependa de las clases nuevas y no del
+    # rendimiento en COCO (en el experimento 2 la mejor «época» fue la 1). La
+    # parte de prueba comprueba que el modelo no olvidó las clases comunes.
+    counts = {"train": 0, "test": 0}
+    folders = {"train": "train", "test": "test"}
     for folder in folders.values():
         (args.output / folder / "images").mkdir(parents=True, exist_ok=True)
         (args.output / folder / "labels").mkdir(parents=True, exist_ok=True)
@@ -70,7 +72,7 @@ def main() -> None:
         lines = yolo_lines(per_image[image_id], info)
         if not lines:
             return None
-        split = split_for(info["file_name"])
+        split = split_for(info["file_name"], val_ratio=0.0, test_ratio=0.15)
         folder = args.output / folders[split]
         image_path = folder / "images" / info["file_name"]
         if not image_path.exists():
