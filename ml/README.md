@@ -13,6 +13,7 @@ YOLOv8n preentrenado en COCO como modelo base. Esta carpeta produce el modelo aj
 | `eyesight_ml/manifest.py` | Copia el modelo a `assets/models` con su SHA-256 |
 | `eyesight_ml/frames.py` | Elige cuadros nítidos de los videos (1 por segundo, varianza del laplaciano) |
 | `scripts/extract_frames.py` | Paso 0: cuadros de los videos grabados en Pasto, con caras difuminadas |
+| `eyesight_ml/coco_subset.py` y `scripts/fetch_coco_subset.py` | Subconjunto de COCO 2017 con bicicletas, camiones, buses y perros, para evitar el olvido catastrófico de las clases comunes |
 | `GUIA-GRABACION.md` | Cómo grabar en Pasto, separar entrenamiento y prueba por sector y etiquetar en Roboflow |
 | `scripts/prepare_dataset.py` | Paso 1: arma el conjunto de datos |
 | `scripts/train.py` | Paso 2: ajuste fino de YOLOv8n a 320 px |
