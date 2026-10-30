@@ -259,7 +259,7 @@ def main() -> None:
     parser.add_argument(
         "--test-dir",
         type=Path,
-        help="exportación YOLOv8 de Roboflow del conjunto de prueba de Pasto (carpeta con data.yaml y test/)",
+        help="exportación YOLOv8 de Roboflow del conjunto de prueba de Pasto (se usan todas sus particiones)",
     )
     parser.add_argument("--base", default="yolov8n.pt", help="modelo preentrenado COCO")
     parser.add_argument("--tuned", required=True, help="best.pt o el .tflite exportado")
@@ -271,10 +271,22 @@ def main() -> None:
 
     if args.test_dir is not None:
         mapping = build_mapping(read_source_names(args.test_dir / "data.yaml"))
-        images, gts = load_ground_truth(args.test_dir / "test" / "images", mapping)
+        # Todo el proyecto de prueba es el examen: se leen todas sus
+        # particiones, porque Roboflow puede marcarlas como train o valid.
+        images, gts = [], []
+        for split in ("train", "valid", "val", "test"):
+            folder = args.test_dir / split / "images"
+            if folder.is_dir():
+                split_images, split_gts = load_ground_truth(folder, mapping)
+                images += split_images
+                gts += split_gts
+        if not images:
+            raise SystemExit(f"No encontré imágenes en {args.test_dir}")
     elif args.data is not None:
         data = yaml.safe_load(args.data.read_text(encoding="utf-8"))
         images, gts = load_ground_truth(Path(data["path"]) / data["test"])
+        if not images:
+            raise SystemExit("La partición de prueba del conjunto unido está vacía")
     else:
         raise SystemExit("Indique --test-dir (prueba de Pasto) o --data (conjunto unido)")
     print(f"Imágenes de prueba: {len(images)}; cajas reales: {len(gts)}")
