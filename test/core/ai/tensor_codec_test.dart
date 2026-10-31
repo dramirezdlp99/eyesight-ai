@@ -78,4 +78,24 @@ void main() {
     expect(out[0], closeTo(0, 1e-6));
     expect(out[1], closeTo(1, 1e-6));
   });
+
+  test('forma de entrada: canales al final o primero', () {
+    expect(ModelIO.inputLayout([1, 320, 320, 3]),
+        (size: 320, channelsFirst: false));
+    expect(ModelIO.inputLayout([1, 3, 480, 480]),
+        (size: 480, channelsFirst: true));
+    expect(() => ModelIO.inputLayout([1, 480, 480]), throwsArgumentError);
+    expect(() => ModelIO.inputLayout([1, 4, 480, 5]), throwsArgumentError);
+  });
+
+  test('reordena RGB intercalado a un plano por canal', () {
+    // Imagen 2 × 2: píxel p tiene R = p, G = 10 + p, B = 20 + p.
+    final hwc = Float32List.fromList([
+      for (var p = 0; p < 4; p++) ...[p.toDouble(), 10.0 + p, 20.0 + p],
+    ]);
+    final chw = TensorCodec.toChannelsFirst(hwc, 2);
+    expect(chw, [0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23]);
+    final reused = TensorCodec.toChannelsFirst(hwc, 2, reuse: chw);
+    expect(identical(reused, chw), isTrue);
+  });
 }
