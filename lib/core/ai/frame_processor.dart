@@ -55,6 +55,7 @@ class FrameProcessor {
   final YoloDecoder _decoder;
   final YoloOutputLayout _layout;
   Float32List? _buffer;
+  Float32List? _planar;
 
   ProcessedFrame process(
     YuvFrame frame, {
@@ -69,7 +70,13 @@ class FrameProcessor {
       reuse: _buffer,
     );
     _buffer = image;
-    final input = TensorCodec.encodeInput(image, io);
+    var ordered = image;
+    if (io.channelsFirst) {
+      ordered =
+          TensorCodec.toChannelsFirst(image, io.inputSize, reuse: _planar);
+      _planar = ordered;
+    }
+    final input = TensorCodec.encodeInput(ordered, io);
     final pre = sw.elapsedMicroseconds;
 
     final raw = _run(input);
