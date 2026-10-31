@@ -62,8 +62,10 @@ flutter run
 
 `assets/models/` contiene el modelo, sus etiquetas y `model_manifest.json` con su SHA-256. La app
 verifica ese resumen antes de ejecutar el modelo y, si no coincide, no lo carga (STRIDE:
-manipulación). Hoy se incluye YOLOv8n **preentrenado en COCO** (modelo base de la hipótesis); el
-modelo **ajustado e INT8** se produce con `ml/` y se instala con `ml/scripts/export.py`.
+manipulación). Se incluye el modelo **YOLOv8n ajustado con imágenes de Pasto**, cuantizado en
+INT8 (3,3 MB) y con entrada de 480 px, para 13 clases: las 7 comunes con COCO, más poste, bolardo,
+cono, escalón, hueco y obra. Se produce con `ml/` (experimento 3, ver
+`docs/resultados-modelo.md`) y se instala con `ml/scripts/export.py`.
 
 La inferencia corre con LiteRT en un hilo aislado que hace la conversión YUV, la inferencia y la
 NMS; la interfaz solo recibe las cajas. El **modo de pruebas** (Ajustes → Modo de pruebas)
