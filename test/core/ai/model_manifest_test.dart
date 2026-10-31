@@ -72,12 +72,20 @@ void main() {
       final labels = ModelIntegrity.parseLabels(
         File(manifest.labelsAsset).readAsStringSync(),
       );
-      expect(manifest.inputSize, 320);
-      // YOLOv8n de 320 px: [1, 4 + clases, 2100].
+      // Modelo ajustado con imágenes de Pasto (experimento 3): 480 px y
+      // 13 clases. YOLOv8 a 480 px: [1, 4 + clases, 4725], con
+      // 4725 = 60² + 30² + 15² (rejillas de paso 8, 16 y 32).
+      expect(manifest.inputSize, 480);
+      expect(labels, hasLength(13));
+      final s = manifest.inputSize;
+      final candidates =
+          (s ~/ 8) * (s ~/ 8) + (s ~/ 16) * (s ~/ 16) + (s ~/ 32) * (s ~/ 32);
+      expect(candidates, 4725);
       final layout = YoloOutputLayout.fromShape(
-          [1, 4 + labels.length, 2100], labels.length);
-      expect(layout.numCandidates, 2100);
+          [1, 4 + labels.length, candidates], labels.length);
+      expect(layout.numCandidates, 4725);
       expect(labels.first, 'person');
+      expect(labels.last, 'construction');
     });
   });
 }

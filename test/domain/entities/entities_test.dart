@@ -109,7 +109,7 @@ void main() {
       const s = AppSettings();
       expect(s.profile, isNull);
       expect(s.alertRadiusM, 20);
-      expect(s.confidenceThreshold, 0.5);
+      expect(s.confidenceThreshold, 0.35);
       expect(s.videoSource, VideoSourceKind.phone);
       expect(s.vibration, isTrue);
       expect(s.autoZones, isTrue);
