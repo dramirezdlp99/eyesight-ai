@@ -265,8 +265,10 @@ TensorKind _kindOf(TensorType type) => switch (type) {
     interpreter.allocateTensors();
     final input = interpreter.getInputTensor(0);
     final output = interpreter.getOutputTensor(0);
+    final layout = ModelIO.inputLayout(input.shape);
     final io = ModelIO(
-      inputSize: input.shape[1],
+      inputSize: layout.size,
+      channelsFirst: layout.channelsFirst,
       inputKind: _kindOf(input.type),
       inputScale: input.params.scale,
       inputZeroPoint: input.params.zeroPoint,
