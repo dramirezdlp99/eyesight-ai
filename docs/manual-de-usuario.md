@@ -128,10 +128,10 @@ La cámara y el modelo trabajan todo el tiempo, así que el consumo es parecido 
 Termine el escáner cuando no lo use.
 
 **¿Detecta huecos y escaleras?**
-El modelo de esta versión reconoce objetos comunes de la calle: personas, vehículos, bicicletas,
-perros, semáforos y bancas. Los postes, huecos, escalones y obras se agregan con el modelo
-ajustado con imágenes de Pasto. Mientras tanto, esos peligros se avisan con las zonas de riesgo
-registradas.
+Desde la versión 1.1.0, el modelo está entrenado con imágenes de Pasto y reconoce postes,
+bolardos, gradas, bordillos, reductores de velocidad, conos, obras y huecos, además de personas y
+vehículos. Los huecos son lo más difícil de ver para la cámara; por eso conviene marcarlos como
+zona de riesgo, y así la app los avisa siempre por GPS.
 
 **No siento la vibración.**
 Algunos teléfonos, como el vivo Y22s, no vibran mientras una app usa la cámara: es una
