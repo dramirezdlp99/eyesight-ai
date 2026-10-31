@@ -17,7 +17,24 @@ class ModelIO {
     this.inputZeroPoint = 0,
     this.outputScale = 1,
     this.outputZeroPoint = 0,
+    this.channelsFirst = false,
   });
+
+  /// Tamaño y orden de la entrada a partir de su forma: `[1, alto, ancho, 3]`
+  /// (canales al final, exportación clásica de TensorFlow Lite) o
+  /// `[1, 3, alto, ancho]` (canales primero, exportación LiteRT de PyTorch).
+  static ({int size, bool channelsFirst}) inputLayout(List<int> shape) {
+    if (shape.length != 4) {
+      throw ArgumentError('Forma de entrada no soportada: $shape');
+    }
+    if (shape[3] == 3) {
+      return (size: shape[1], channelsFirst: false);
+    }
+    if (shape[1] == 3) {
+      return (size: shape[2], channelsFirst: true);
+    }
+    throw ArgumentError('Forma de entrada no soportada: $shape');
+  }
 
   final int inputSize;
   final TensorKind inputKind;
@@ -28,6 +45,9 @@ class ModelIO {
   final double outputScale;
   final int outputZeroPoint;
 
+  /// `true` si la entrada es `[1, 3, alto, ancho]`.
+  final bool channelsFirst;
+
   int get inputByteLength {
     final values = inputSize * inputSize * 3;
     return inputKind == TensorKind.float32 ? values * 4 : values;
@@ -35,11 +55,33 @@ class ModelIO {
 
   @override
   String toString() =>
-      'ModelIO(entrada ${inputKind.name} $inputSize, salida ${outputKind.name} $outputShape)';
+      'ModelIO(entrada ${inputKind.name} $inputSize${channelsFirst ? ' NCHW' : ''}, '
+      'salida ${outputKind.name} $outputShape)';
 }
 
 /// Conversión entre la imagen normalizada y los bytes de los tensores.
 abstract final class TensorCodec {
+  /// Reordena una imagen de `alto × ancho × 3` (RGB intercalado) a
+  /// `3 × alto × ancho` (un plano por canal), como piden los modelos
+  /// exportados con LiteRT desde PyTorch.
+  static Float32List toChannelsFirst(
+    Float32List hwc,
+    int size, {
+    Float32List? reuse,
+  }) {
+    final plane = size * size;
+    final out = reuse != null && reuse.length == hwc.length
+        ? reuse
+        : Float32List(hwc.length);
+    for (var p = 0; p < plane; p++) {
+      final i = p * 3;
+      out[p] = hwc[i];
+      out[plane + p] = hwc[i + 1];
+      out[2 * plane + p] = hwc[i + 2];
+    }
+    return out;
+  }
+
   /// Codifica la imagen (valores de 0 a 1) en los bytes de entrada.
   /// En modelos cuantizados: q = round(x / escala) + punto_cero.
   static Uint8List encodeInput(Float32List image, ModelIO io) {
