@@ -86,7 +86,9 @@ abstract final class AppConstants {
 
   // ------------------------------------------------------------ Ajustes
   /// Umbral de confianza por defecto y rango permitido (HU13, CA2).
-  static const double defaultConfidenceThreshold = 0.50;
+  /// 0,35: la F1 más alta del modelo ajustado en la prueba de Pasto está
+  /// entre 0,30 (INT8) y 0,40 (float32); ver docs/resultados-modelo.md.
+  static const double defaultConfidenceThreshold = 0.35;
   static const double minConfidenceThreshold = 0.30;
   static const double maxConfidenceThreshold = 0.90;
 
