@@ -1,9 +1,9 @@
 {
-  "name": "yolov8n-coco-preentrenado",
+  "name": "yolov8n-eyesight-ajustado-int8",
   "file": "eyesight_yolov8n.tflite",
   "labels": "labels.txt",
-  "sha256": "ce614a5bd27a619f36dd124c1678d3b0f518d0de0d10a26a6418d23b2e06c50a",
-  "input_size": 320,
-  "quantization": "float32",
-  "source": "Ultralytics YOLOv8n preentrenado en COCO, sin ajuste fino (modelo base de la hipótesis, numeral 2.3)"
+  "sha256": "f49aad83b97cef00e5fb360505208fcd3a64dd01cfc3fa9605798e2abb447e99",
+  "input_size": 480,
+  "quantization": "int8",
+  "source": "YOLOv8n ajustado con el conjunto ampliado de EyeSight AI (best.pt)"
 }
