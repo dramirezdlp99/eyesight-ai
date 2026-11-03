@@ -417,8 +417,11 @@ class ScannerController extends GetxController with WidgetsBindingObserver {
           frame,
           confidenceThreshold: _config.confidenceThreshold,
         );
-      } on Object {
+      } on Object catch (e) {
         _failures++;
+        if (_failures == 1) {
+          debugPrint('EyeSight: falla del modelo: $e');
+        }
         if (_failures == AppConstants.detectionFailuresToWarn) {
           status.value = 'Falla en la detección';
           unawaited(alerts.say(detectionFailedMessage));
