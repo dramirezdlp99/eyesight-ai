@@ -72,6 +72,14 @@ void main() {
     expect(speech.spoken.single, 'Persona, cerca, al frente');
   });
 
+  test('si el modelo falla al analizar, se muestra el error', () async {
+    await c.start();
+    detector.failOnDetect = true;
+    await frames(2);
+    expect(c.error.value, contains('Falla del modelo'));
+    expect(c.frames.value, 0);
+  });
+
   test('CA2: cada cuadro queda con su caso, clase y etiqueta real', () async {
     c.testCase.value = TestCase.cp03;
     c.groundTruth.value = 'person';
