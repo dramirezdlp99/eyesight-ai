@@ -265,7 +265,9 @@ class TestModeController extends GetxController {
           frame,
           confidenceThreshold: _config.confidenceThreshold,
         );
-      } on Object {
+      } on Object catch (e) {
+        // Se muestra el primer error del modelo para poder diagnosticarlo.
+        error.value ??= 'Falla del modelo: $e';
         return;
       }
       if (!running) {
