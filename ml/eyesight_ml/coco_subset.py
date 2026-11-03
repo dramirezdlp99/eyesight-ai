@@ -29,8 +29,20 @@ COCO_CATEGORY_TO_EYESIGHT: dict[int, str] = {
     18: "dog",
 }
 
-# Clases que faltan en Pasto: se buscan imágenes que las contengan.
-WANTED_DEFAULT: tuple[str, ...] = ("bicycle", "truck", "bus", "dog")
+# Clases que se buscan en COCO. Bicicletas, camiones, buses y perros casi no
+# salen en Pasto. Personas, carros y motos sí salen, pero solo de lejos y en
+# la calle: sin ejemplos de COCO (también de cerca), el modelo ajustado las
+# olvida fuera de ese contexto y, por ejemplo, confunde una cara cercana con
+# un perro (experimento 3).
+WANTED_DEFAULT: tuple[str, ...] = (
+    "person",
+    "car",
+    "motorcycle",
+    "bicycle",
+    "truck",
+    "bus",
+    "dog",
+)
 
 # Cajas más pequeñas que esta fracción del área de la imagen no se usan:
 # objetos diminutos al fondo, que la app no anuncia.
