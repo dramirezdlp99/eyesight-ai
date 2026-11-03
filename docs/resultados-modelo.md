@@ -130,9 +130,44 @@ son descriptivos.
 Mejoras posibles: más videos por clase, YOLOv8s si el teléfono lo permite, y aprendizaje continuo
 con consentimiento.
 
+## Exportación para el teléfono · 3 de noviembre de 2026
+
+**Problema.** El modelo INT8 exportado en Colab con Ultralytics 8.4.83 o posterior usa la nueva
+ruta LiteRT (`litert-torch` y `ai-edge-quantizer`). Ese archivo funciona en un computador x86,
+pero en el vivo Y22s (ARM) la inferencia falla siempre con «Bad state: failed precondition»
+(falla `TfLiteInterpreterInvoke`). El modo de pruebas mostró el error exacto. El archivo declara
+todas sus operaciones en la versión 1 aunque sus tensores son int8, y tiene entrada con canales
+primero, `[1, 3, 480, 480]`.
+
+**Solución.** Se volvió a exportar el mismo `best.pt` por la ruta clásica, en un entorno con
+Python 3.11, Ultralytics 8.4.82, TensorFlow 2.19.0 y onnx2tf 1.27.10:
+
+```
+yolo export model=best.pt format=tflite imgsz=480 int8=True data=calib.yaml
+```
+
+La calibración usa 150 cuadros de entrenamiento de Pasto. Esa ruta produce modelos con entrada
+`[1, 480, 480, 3]` (canales al final) y versiones de operación correctas (CONV_2D v3/v5). Las
+variantes se compararon en la prueba de Pasto (AP@0,5, LiteRT 1.4):
+
+| Clase | best.pt float32 | INT8 dinámico | INT8 entero (E/S float) | INT8 entero (E/S int8) | LiteRT INT8 (falla en el teléfono) |
+|---|---|---|---|---|---|
+| step | 0,380 | **0,354** | 0,332 | 0,335 | 0,320 |
+| pole | 0,256 | 0,269 | **0,297** | 0,284 | 0,245 |
+| bollard | 0,078 | **0,081** | 0,076 | 0,072 | 0,070 |
+| pothole | 0,093 | 0,090 | **0,092** | 0,087 | 0,059 |
+| person | 0,693 | **0,681** | 0,601 | 0,601 | 0,564 |
+| car | 0,588 | **0,596** | 0,559 | 0,556 | 0,457 |
+| motorcycle | 0,487 | **0,476** | 0,396 | 0,399 | 0,444 |
+
+**Decisión.** Se empaqueta el **INT8 dinámico** (`best_int8.tflite`, 3,4 MB): pesos en int8 y
+cálculo en float. Es la variante más cercana al modelo float32 en todas las clases, y mejora al
+INT8 de LiteRT. Si en el teléfono resulta lento, la alternativa es el INT8 entero, con algo
+menos de AP en personas y motos.
+
 ## Configuración en la app
 
-- Modelo INT8, entrada de 480×480 en formato `[1, 3, 480, 480]` (canales primero, exportación
-  LiteRT). La app detecta el formato sola.
+- Modelo INT8 dinámico, entrada de 480×480 en formato `[1, 480, 480, 3]` (exportación clásica
+  con onnx2tf). La app detecta sola si la entrada tiene los canales primero o al final.
 - Umbral de confianza por defecto: **0,35**, entre el mejor umbral de INT8 (0,30) y el de float32
   (0,40). El acompañante lo puede ajustar en Ajustes.
