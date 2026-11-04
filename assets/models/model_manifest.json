@@ -2,8 +2,8 @@
   "name": "yolov8n-eyesight-ajustado-int8-dinamico",
   "file": "eyesight_yolov8n.tflite",
   "labels": "labels.txt",
-  "sha256": "2ee9f4bac245dafb2d864a4db1241ad27e6840799a59af12017121dee5a2438b",
+  "sha256": "b82dddefbcd35a059067fdc64ebcd3bc865a95ebf88cfe33030500e4e8c52e80",
   "input_size": 480,
   "quantization": "int8-dynamic-range",
-  "source": "YOLOv8n ajustado (experimento 3, best.pt) exportado con Ultralytics 8.4.82, onnx2tf 1.27.10 y TensorFlow 2.19.0; entrada [1, 480, 480, 3]"
+  "source": "YOLOv8n ajustado (experimento 4, best.pt) exportado con Ultralytics 8.4.82, onnx2tf 1.27.10 y TensorFlow 2.19.0; entrada [1, 480, 480, 3]"
 }
