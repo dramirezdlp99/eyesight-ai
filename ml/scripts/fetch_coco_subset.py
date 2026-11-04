@@ -1,6 +1,8 @@
-"""Descarga un subconjunto de COCO 2017 con bicicletas, camiones, buses y
-perros, en el formato de una exportación YOLOv8 de Roboflow, para unirlo con
-prepare_dataset.py. Así el modelo ajustado no olvida esas clases.
+"""Descarga un subconjunto de COCO 2017 con las clases comunes (personas,
+vehículos y perros) y con imágenes de fondo sin esas clases, en el formato de
+una exportación YOLOv8 de Roboflow, para unirlo con prepare_dataset.py. Así
+el modelo ajustado no olvida las clases comunes ni anuncia objetos que no
+conoce.
 
 Uso (en Colab, desde la carpeta ml):
     python scripts/fetch_coco_subset.py --output datasets/raw/coco-comunes
@@ -22,7 +24,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from eyesight_ml.classes import EYESIGHT_CLASSES  # noqa: E402
-from eyesight_ml.coco_subset import select_images, yolo_lines  # noqa: E402
+from eyesight_ml.coco_subset import select_backgrounds, select_images, yolo_lines  # noqa: E402
 from eyesight_ml.dataset import split_for  # noqa: E402
 
 ANNOTATIONS_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
@@ -47,6 +49,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("datasets/raw/coco-comunes"))
     parser.add_argument("--cache", type=Path, default=Path("datasets/coco-cache"))
     parser.add_argument("--per-class", type=int, default=150)
+    parser.add_argument("--backgrounds", type=int, default=150)
     args = parser.parse_args()
 
     coco = load_annotations(args.cache)
@@ -55,7 +58,11 @@ def main() -> None:
     for ann in coco["annotations"]:
         per_image[ann["image_id"]].append(ann)
     chosen = select_images(coco["annotations"], images, per_class=args.per_class)
-    print(f"Imágenes elegidas: {len(chosen)}")
+    backgrounds = select_backgrounds(
+        coco["annotations"], images, count=args.backgrounds, exclude=set(chosen)
+    )
+    background_ids = set(backgrounds)
+    print(f"Imágenes elegidas: {len(chosen)} con clases y {len(backgrounds)} de fondo")
 
     # Partición 85/0/15. La validación queda solo con videos de Pasto, para que
     # la elección de la mejor época dependa de las clases nuevas y no del
@@ -70,7 +77,7 @@ def main() -> None:
     def save(image_id: int) -> str | None:
         info = images[image_id]
         lines = yolo_lines(per_image[image_id], info)
-        if not lines:
+        if not lines and image_id not in background_ids:
             return None
         split = split_for(info["file_name"], val_ratio=0.0, test_ratio=0.15)
         folder = args.output / folders[split]
@@ -82,12 +89,12 @@ def main() -> None:
                 print(f"  No pude descargar {info['file_name']}: {error}")
                 return None
         (folder / "labels" / f"{Path(info['file_name']).stem}.txt").write_text(
-            "\n".join(lines) + "\n", encoding="utf-8"
+            "\n".join(lines) + ("\n" if lines else ""), encoding="utf-8"
         )
         return split
 
     with ThreadPoolExecutor(max_workers=16) as pool:
-        for split in pool.map(save, chosen):
+        for split in pool.map(save, chosen + backgrounds):
             if split:
                 counts[split] += 1
 
