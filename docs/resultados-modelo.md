@@ -130,6 +130,51 @@ son descriptivos.
 Mejoras posibles: más videos por clase, YOLOv8s si el teléfono lo permite, y aprendizaje continuo
 con consentimiento.
 
+## Experimento 4 · 3 de noviembre de 2026 (modelo elegido)
+
+**Problema observado en el teléfono** con el modelo del experimento 3: una persona cerca de la
+cámara se anunciaba como «perro», y un televisor como «bicicleta». La prueba de Pasto no lo
+mostraba, porque allí las personas salen lejos y en la calle.
+
+**Causa.** El subconjunto de COCO solo traía bicicletas, camiones, buses y perros. Personas,
+carros y motos venían solo de Pasto, siempre lejos, así que el modelo olvidó cómo se ven de
+cerca (olvido catastrófico). Lo único «grande y de cerca» que veía eran perros de COCO.
+
+**Cambio único frente al experimento 3:** COCO aporta también personas, carros y motos (150
+imágenes por clase, en todo tipo de escenas). Entrenamiento: 65 épocas, con la mejor en la 25.
+
+**Prueba de primer plano** (imágenes nítidas de muestra de Ultralytics y scikit-image, umbral
+0,35):
+
+| Imagen | YOLOv8n de COCO | Exp. 3 | Exp. 4 (INT8 del teléfono) |
+|---|---|---|---|
+| Retrato de una persona | persona | bicicleta | **persona** |
+| Cara recortada del retrato | persona | perro | **persona** |
+| Dos personas de cerca | persona | persona | **persona** |
+| Taza de café (sin obstáculos) | — | perro | **nada** |
+| Gato | gato | perro | perro |
+
+**Prueba de Pasto** (AP@0,5):
+
+| Clase | Exp. 3 float32 | Exp. 4 float32 | Exp. 4 INT8 dinámico (app) |
+|---|---|---|---|
+| step | 0,380 | 0,306 | 0,302 |
+| pole | 0,256 | **0,332** | 0,309 |
+| bollard | 0,078 | 0,038 | 0,054 |
+| pothole | 0,093 | 0,054 | 0,058 |
+| person | 0,693 | 0,652 | 0,636 |
+| car | 0,588 | 0,593 | 0,585 |
+| motorcycle | 0,487 | **0,542** | 0,531 |
+
+**Clases comunes (prueba de COCO, que ahora incluye personas):** el ajustado queda por debajo
+del preentrenado (diferencia de mAP@0,5 de −0,204; IC 95 % [−0,251; −0,142]). La matriz de
+confusión muestra que casi no confunde clases entre sí (1 persona como perro, de 347): pierde
+sobre todo recall, porque deja objetos sin detectar.
+
+**Decisión.** Se elige el experimento 4. Pierde algo en `step` y en `pothole`, pero gana en
+`pole` y en motos, y corrige las confusiones de primer plano, que en uso real generan alertas
+falsas muy visibles. Un gato se anuncia como «perro» porque «gato» no es clase; como obstáculo, el aviso sigue siendo útil.
+
 ## Exportación para el teléfono · 3 de noviembre de 2026
 
 **Problema.** El modelo INT8 exportado en Colab con Ultralytics 8.4.83 o posterior usa la nueva
@@ -139,7 +184,7 @@ pero en el vivo Y22s (ARM) la inferencia falla siempre con «Bad state: failed p
 todas sus operaciones en la versión 1 aunque sus tensores son int8, y tiene entrada con canales
 primero, `[1, 3, 480, 480]`.
 
-**Solución.** Se volvió a exportar el mismo `best.pt` por la ruta clásica, en un entorno con
+**Solución.** Se volvió a exportar el `best.pt` por la ruta clásica, en un entorno con
 Python 3.11, Ultralytics 8.4.82, TensorFlow 2.19.0 y onnx2tf 1.27.10:
 
 ```
