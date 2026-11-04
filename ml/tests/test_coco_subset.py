@@ -48,3 +48,20 @@ def test_convierte_a_yolo_con_los_indices_de_eyesight():
 def test_descarta_grupos_y_cajas_diminutas():
     lines = yolo_lines([a for a in ANNS if a["image_id"] == 3], IMAGES[3])
     assert lines == []
+
+
+def test_elige_fondos_sin_ninguna_clase_de_eyesight():
+    from eyesight_ml.coco_subset import select_backgrounds
+
+    imgs = {i: {"id": i, "width": 640, "height": 480} for i in range(1, 7)}
+    anns = [
+        {"image_id": 1, "category_id": 1, "bbox": [1, 1, 2, 2], "iscrowd": 0},  # persona diminuta
+        {"image_id": 2, "category_id": 72, "bbox": [0, 0, 300, 200], "iscrowd": 0},  # televisor
+        {"image_id": 3, "category_id": 18, "bbox": [0, 0, 300, 200], "iscrowd": 1},  # perros en grupo
+    ]
+    fondos = select_backgrounds(anns, imgs, count=10, exclude={4})
+    assert sorted(fondos) == [2, 5, 6]
+    assert select_backgrounds(anns, imgs, count=2, seed=3) == select_backgrounds(
+        anns, imgs, count=2, seed=3
+    )
+    assert len(select_backgrounds(anns, imgs, count=2)) == 2
