@@ -84,6 +84,28 @@ def select_images(
     return chosen
 
 
+def select_backgrounds(
+    annotations: list[dict],
+    images: dict[int, dict],
+    count: int = 150,
+    seed: int = 0,
+    exclude: set[int] | None = None,
+) -> list[int]:
+    """Ids de imágenes de fondo: escenas de COCO (televisores, muebles, gatos,
+    comida…) sin ninguna de las clases de EyeSight AI, ni siquiera diminuta.
+    Con etiquetas vacías enseñan al modelo a no anunciar objetos que no
+    conoce; sin ellas, un televisor se anunciaba como «bicicleta»."""
+    with_classes = {
+        ann.get("image_id")
+        for ann in annotations
+        if ann.get("category_id") in COCO_CATEGORY_TO_EYESIGHT
+    }
+    skip = exclude or set()
+    ids = sorted(i for i in images if i not in with_classes and i not in skip)
+    random.Random(seed).shuffle(ids)
+    return ids[:count]
+
+
 def yolo_lines(annotations: list[dict], info: dict) -> list[str]:
     """Líneas YOLO (clase cx cy w h normalizados) de una imagen, solo con
     las clases de EyeSight AI y sin cajas diminutas ni grupos (iscrowd)."""
