@@ -4,7 +4,7 @@
 **Modelo:** YOLOv8n preentrenado en COCO, float32, entrada de 320 px (12,7 MB).
 **Datos:** CSV exportados con el modo de pruebas (HU15).
 
-Los casos marcados como «pendiente» se completan con el modelo INT8 ajustado a Pasto.
+El caso CP-02c usa el modelo INT8 ajustado a Pasto.
 
 ## Resumen
 
@@ -13,6 +13,8 @@ Los casos marcados como «pendiente» se completan con el modelo INT8 ajustado a
 | CP-02 | RNF01: tiempo de inferencia | < 100 ms | Media de 202,1 ms; mediana de 193,7 ms; p95 de 283,7 ms | No cumple con el modelo base |
 | CP-02 | RNF02: de la captura a la alerta | ≤ 500 ms | Media de 225,9 ms; p95 de 309 ms; máximo de 315 ms; el 100 % ≤ 500 ms | **Cumple** |
 | CP-02 | RNF03: cuadros por segundo | 5 a 10 fps | Media de 4,19 fps (entre 3,05 y 4,8) | No cumple con el modelo base |
+| CP-02c | RNF02 con el modelo de Pasto INT8 (480 px) | ≤ 500 ms | Mediana de 259,4 ms; máximo de 318,7 ms | **Cumple** |
+| CP-02c | RNF01 y RNF03 con el modelo de Pasto | < 100 ms; 5 a 10 fps | Inferencia mediana de 234,7 ms; 3,69 fps | No cumple en gama baja |
 | CP-04 | RNF04: sin internet | Funciones críticas sin conexión | Detección, voz, pitidos, zonas, historial, ajustes y privacidad funcionan | **Cumple** |
 | CP-04 | HU04: vibración durante el escáner | 3, 2 o 1 pulsos según la cercanía | El vivo Y22s bloquea toda vibración con la cámara activa; se compensa con pitidos | Limitación del teléfono, mitigada |
 | CP-04 | RNF05: tolerancia a fallos | Respaldo cuando falla un servicio | Sin el paquete de voz, los comandos pasan a botones y gestos | **Cumple** |
@@ -76,12 +78,26 @@ columna `hilos` del CSV identifica cada configuración.
 - **Conclusión:** la mejora de RNF01 y RNF03 no vendrá de los hilos sino del modelo **INT8**
   (CP-02c), que reduce el cómputo por cuadro.
 
-### CP-02c. Modelo INT8 ajustado (pendiente)
+### CP-02c. Modelo INT8 ajustado a Pasto (3 de noviembre de 2026)
 
-| Modelo | Tamaño | Inferencia media (ms) | fps | mAP@0.5 (Pasto) |
-|---|---|---|---|---|
-| YOLOv8n COCO float32 | 12,7 MB | 202,1 | 4,19 | — |
-| YOLOv8n Pasto INT8 | | | | |
+Modelo INT8 dinámico de 480 px (exportación clásica con onnx2tf), 4 hilos, 60 s y 257 cuadros.
+La arquitectura y el tamaño de entrada son iguales en los experimentos 3 y 4, así que el tiempo
+es el mismo.
+
+| Modelo | Tamaño | Entrada | Inferencia mediana (ms) | p95 (ms) | fps (mediana) | Captura a alerta (mediana) |
+|---|---|---|---|---|---|---|
+| YOLOv8n COCO float32 | 12,7 MB | 320 px | 193,7 | 283,7 | 4,19 (media) | 225,9 ms (media) |
+| YOLOv8n Pasto INT8 dinámico | 3,4 MB | 480 px | 234,7 | 306,9 | 3,69 | 259,4 ms |
+
+- **RNF02 (≤ 500 ms de la captura a la alerta): cumple.** Todos los valores medidos quedaron por
+  debajo de 320 ms.
+- **RNF01 y RNF03: no cumplen en el vivo Y22s.** El modelo de 480 px analiza 2,25 veces más
+  píxeles que el de 320 px, y aun así tarda solo entre un 3 % (frente a la mediana de CP-02b,
+  227,3 ms) y un 21 % (frente a CP-02, 193,7 ms) más, gracias a la cuantización INT8. Con
+  unos 3,7 cuadros por segundo y el filtro de 3 cuadros, una alerta se confirma en menos de
+  1 s, lo que a paso normal (1,2 m/s) equivale a algo más de 1 m.
+- La exportación INT8 de LiteRT (Ultralytics 8.4.83 o posterior) fallaba en el teléfono con
+  «failed precondition»; la exportación clásica sí funciona (ver `resultados-modelo.md`).
 
 ## CP-04. Modo avión
 
@@ -122,9 +138,9 @@ aunque el teléfono bloquee la vibración.
 **Para el informe.** La limitación depende del modelo de teléfono; se recomienda verificarla en
 otros equipos y mencionarla en las recomendaciones de compra (anexo de presupuesto).
 
-## Evaluación del modelo con imágenes de Pasto (pendiente)
+## Evaluación del modelo con imágenes de Pasto
 
-Se ejecuta `ml/scripts/evaluate.py --test-dir <exportación de Roboflow>`.
+Los resultados de los experimentos 1 a 4 están en `resultados-modelo.md`. Se ejecuta `ml/scripts/evaluate.py --test-dir <exportación de Roboflow>`.
 
 | Nivel | Métricas |
 |---|---|
