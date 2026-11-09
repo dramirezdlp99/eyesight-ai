@@ -18,6 +18,7 @@ El caso CP-02c usa el modelo INT8 ajustado a Pasto.
 | CP-04 | RNF04: sin internet | Funciones críticas sin conexión | Detección, voz, pitidos, zonas, historial, ajustes y privacidad funcionan | **Cumple** |
 | CP-04 | HU04: vibración durante el escáner | 3, 2 o 1 pulsos según la cercanía | El vivo Y22s bloquea toda vibración con la cámara activa; se compensa con pitidos | Limitación del teléfono, mitigada |
 | CP-04 | RNF05: tolerancia a fallos | Respaldo cuando falla un servicio | Sin el paquete de voz, los comandos pasan a botones y gestos | **Cumple** |
+| CP-05 | HU02 y HU03 en la calle | Detecta y anuncia los obstáculos del recorrido | Escalón cercano, personas, motos y carros correctos; una moto como «bicicleta» y un falso «cono» | Cumple de forma cualitativa |
 
 ## CP-02. Rendimiento (modelo base, 4 hilos)
 
@@ -98,6 +99,30 @@ es el mismo.
   1 s, lo que a paso normal (1,2 m/s) equivale a algo más de 1 m.
 - La exportación INT8 de LiteRT (Ultralytics 8.4.83 o posterior) fallaba en el teléfono con
   «failed precondition»; la exportación clásica sí funciona (ver `resultados-modelo.md`).
+
+## CP-05. Prueba de campo en la calle (noviembre de 2026)
+
+Recorrido corto en una calle de Pasto con el modelo del experimento 4 (INT8, umbral 0,35), con
+el teléfono a la altura del pecho. Es una prueba **cualitativa**: un solo recorrido, sin conteo
+sistemático por clase.
+
+| Situación | Lo que anunció la app | Resultado |
+|---|---|---|
+| Bordillo alto en la franja de paso | «Escalón, cerca, al frente» (0,68 y 0,69), en rojo con 3 pitidos | Correcto |
+| Persona en la acera | «Persona» (0,59 y 0,67), lejos | Correcto |
+| Moto con su conductor | «Motocicleta» (0,56), lejos | Correcto |
+| Carros estacionados | «Automóvil» (0,56) | Correcto |
+| Moto estacionada de lado | «Bicicleta» (0,78) | Clase equivocada; el aviso de obstáculo sí se da |
+| Vehículo blanco | Una caja de «Cono» (0,52) además del vehículo | Falso positivo |
+
+**Análisis.** El modelo detecta en la calle las clases nuevas más importantes, sobre todo el
+escalón o bordillo cercano, que la línea base de COCO no conocía, y las clases comunes. Los
+errores observados son confusiones entre clases parecidas (moto y bicicleta) y algunos falsos
+positivos con confianza baja (0,5). Para el usuario, un obstáculo con el nombre equivocado sigue
+siendo un aviso útil; un falso positivo es una alerta de más.
+
+**Pendiente:** el conteo sistemático por clase (5 intentos por tipo de obstáculo) no se realizó
+por tiempo y queda como trabajo futuro, junto con la validación de la cercanía (CP-06).
 
 ## CP-04. Modo avión
 
