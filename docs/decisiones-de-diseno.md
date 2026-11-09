@@ -155,6 +155,7 @@ publicar el sitio web que lo acompaña.
 | Sitio web | GitHub Pages (`https://dramirezdlp99.github.io/eyesight-ai/`), publicado automáticamente por GitHub Actions en cada cambio de `website/` |
 | Integración continua | GitHub Actions ejecuta formato, análisis estático y pruebas en cada *push* |
 | Verificación | Instalación desde la página en el vivo Y22s |
+| Versiones publicadas | v1.0.0 (21 de octubre, modelo COCO), v1.0.1 (prueba de vibración), v1.0.2 (pitidos) y v1.1.0 (modelo ajustado a Pasto, experimento 4) |
 
 **Diagrama de despliegue (nodos):**
 - **Teléfono Android 8.0 o superior** (dispositivo). Contiene el artefacto `EyeSight-AI.apk`, que
