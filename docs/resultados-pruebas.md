@@ -18,7 +18,7 @@ El caso CP-02c usa el modelo INT8 ajustado a Pasto.
 | CP-04 | RNF04: sin internet | Funciones críticas sin conexión | Detección, voz, pitidos, zonas, historial, ajustes y privacidad funcionan | **Cumple** |
 | CP-04 | HU04: vibración durante el escáner | 3, 2 o 1 pulsos según la cercanía | El vivo Y22s bloquea toda vibración con la cámara activa; se compensa con pitidos | Limitación del teléfono, mitigada |
 | CP-04 | RNF05: tolerancia a fallos | Respaldo cuando falla un servicio | Sin el paquete de voz, los comandos pasan a botones y gestos | **Cumple** |
-| CP-05 | HU02 y HU03 en la calle | Detecta y anuncia los obstáculos del recorrido | Escalón cercano, personas, motos y carros correctos; una moto como «bicicleta» y un falso «cono» | Cumple de forma cualitativa |
+| CP-09 | HU02 y HU03 en la calle | Detecta y anuncia los obstáculos del recorrido | Escalón cercano, personas, motos y carros correctos; una moto como «bicicleta» y un falso «cono» | Cumple de forma cualitativa |
 
 ## CP-02. Rendimiento (modelo base, 4 hilos)
 
@@ -100,7 +100,7 @@ es el mismo.
 - La exportación INT8 de LiteRT (Ultralytics 8.4.83 o posterior) fallaba en el teléfono con
   «failed precondition»; la exportación clásica sí funciona (ver `resultados-modelo.md`).
 
-## CP-05. Prueba de campo en la calle (noviembre de 2026)
+## CP-09. Prueba de campo en la calle (noviembre de 2026)
 
 Recorrido corto en una calle de Pasto con el modelo del experimento 4 (INT8, umbral 0,35), con
 el teléfono a la altura del pecho. Es una prueba **cualitativa**: un solo recorrido, sin conteo
@@ -122,7 +122,7 @@ positivos con confianza baja (0,5). Para el usuario, un obstáculo con el nombre
 siendo un aviso útil; un falso positivo es una alerta de más.
 
 **Pendiente:** el conteo sistemático por clase (5 intentos por tipo de obstáculo) no se realizó
-por tiempo y queda como trabajo futuro, junto con la validación de la cercanía (CP-06).
+por tiempo y queda como trabajo futuro, junto con la validación de la cercanía (CP-10). La numeración de los casos sigue la del informe final (CP-01 a CP-11).
 
 ## CP-04. Modo avión
 
