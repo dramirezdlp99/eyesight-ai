@@ -1,9 +1,9 @@
 # Manual de usuario de EyeSight AI
 
-Versión 1.0.0 · Android 8.0 o superior
+Versión 1.1.0 · Android 8.0 o superior
 
-EyeSight AI avisa con voz, vibración y pitidos suaves los obstáculos que tiene al frente: personas, vehículos,
-bicicletas, bancas, semáforos y otros. También le avisa cuando se acerca a zonas de riesgo que usted o su
+EyeSight AI avisa con voz, vibración y pitidos suaves los obstáculos que tiene al frente: postes,
+escalones y bordillos, bolardos, conos, obras, huecos, personas, perros, bicicletas y vehículos. También le avisa cuando se acerca a zonas de riesgo que usted o su
 acompañante registraron.
 
 > **Importante.** EyeSight AI complementa el bastón y el perro guía; no los reemplaza. Úsela
@@ -52,7 +52,7 @@ usar un soporte o un cordón. El escáner arranca solo y dice «Escáner activo�
 |---|---|---|---|
 | Cerca | «Poste, cerca, al frente» | 3 pulsos y 3 pitidos agudos | Rojo |
 | Media distancia | «Persona, a media distancia, a la izquierda» | 2 pulsos y 2 pitidos | Amarillo |
-| Lejos | «Banca, lejos, a la derecha» | 1 pulso y 1 pitido grave | Gris |
+| Lejos | «Motocicleta, lejos, a la derecha» | 1 pulso y 1 pitido grave | Gris |
 | Zona de riesgo | «Atención: hueco a 15 metros» | 1 pulso largo y un tono doble | Ondas |
 
 Los pitidos siguen el volumen multimedia, igual que la voz. Se pueden apagar en Ajustes.
